@@ -43,6 +43,34 @@ function handleForm(id, action, errorTarget) {
     form.querySelector('button[type="submit"]').disabled = false;
 }
 
+async function copyDomain(domain, feedback) {
+    try {
+        if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(domain);
+        } else {
+            // The dashboard may be served over plain HTTP on a LAN, where Clipboard API is unavailable.
+            const field = document.createElement("textarea");
+            field.value = domain;
+            field.className = "fixed opacity-0";
+            field.setAttribute("aria-label", "Domain to copy");
+            document.body.append(field);
+            const focused = document.activeElement;
+            try {
+                field.select();
+                if (!document.execCommand("copy")) {
+                    throw new Error("Copy unavailable. Select and copy the domain manually.");
+                }
+            } finally {
+                field.remove();
+                focused?.focus();
+            }
+        }
+        feedback.textContent = `Copied ${domain}`;
+    } catch (failure) {
+        showError(failure);
+    }
+}
+
 async function initialize() {
     const session = await api("/authentication/session");
     csrf.content = session.csrfToken;
@@ -84,13 +112,34 @@ async function initialize() {
 
     if (page === "app-settings") {
         const settings = await api("/settings/app");
-        document.querySelector("#publicDashboardEnabled").checked = settings.publicDashboardEnabled;
-        document.querySelector("#showPublicDomains").checked = settings.showPublicDomains;
+        const publicEnabled = document.querySelector("#publicDashboardEnabled");
+        const publicDomains = document.querySelector("#showPublicDomains");
+        const publicMessage = document.querySelector("#publicDashboardMessage");
+        publicEnabled.checked = settings.publicDashboardEnabled;
+        publicEnabled.disabled = false;
+        publicDomains.checked = settings.showPublicDomains;
+        publicMessage.value = settings.publicDashboardMessage;
+        function updatePublicFields() {
+            publicDomains.disabled = !publicEnabled.checked;
+            if (!publicEnabled.checked) {
+                publicDomains.checked = false;
+            }
+            publicMessage.disabled = !publicEnabled.checked;
+            document.querySelector("#public-message-fields").classList.toggle("hidden", !publicEnabled.checked);
+            document.querySelector("#public-domains-label").classList.toggle("text-muted", !publicEnabled.checked);
+            document.querySelector("#public-domains-label").classList.toggle("text-body", publicEnabled.checked);
+        }
+        updatePublicFields();
+        publicEnabled.addEventListener("change", updatePublicFields);
         handleForm("#public-dashboard-settings", async (data) => {
-            await api("/settings/app", { method: "PUT", body: JSON.stringify({
+            const saved = await api("/settings/app", { method: "PUT", body: JSON.stringify({
                 publicDashboardEnabled: data.has("publicDashboardEnabled"),
-                showPublicDomains: data.has("showPublicDomains")
+                showPublicDomains: data.has("showPublicDomains"),
+                publicDashboardMessage: data.get("publicDashboardMessage")
             }) });
+            publicMessage.value = saved.publicDashboardMessage;
+            publicDomains.checked = saved.showPublicDomains;
+            updatePublicFields();
             document.querySelector("#public-settings-status").textContent = "Public dashboard settings saved.";
         });
         if (session.isAuthenticated) {
@@ -404,34 +453,6 @@ function initializeProxies() {
         dialog.showModal();
     }
 
-    async function copyDomain(domain) {
-        try {
-            if (navigator.clipboard && window.isSecureContext) {
-                await navigator.clipboard.writeText(domain);
-            } else {
-                // The dashboard may be served over plain HTTP on a LAN, where Clipboard API is unavailable.
-                const field = document.createElement("textarea");
-                field.value = domain;
-                field.className = "fixed opacity-0";
-                field.setAttribute("aria-label", "Domain to copy");
-                document.body.append(field);
-                const focused = document.activeElement;
-                try {
-                    field.select();
-                    if (!document.execCommand("copy")) {
-                        throw new Error("Copy unavailable. Select and copy the domain manually.");
-                    }
-                } finally {
-                    field.remove();
-                    focused?.focus();
-                }
-            }
-            feedback.textContent = `Copied ${domain}`;
-        } catch (failure) {
-            showError(failure);
-        }
-    }
-
     function updateStatuses(proxies) {
         for (const proxy of proxies) {
             const cell = statuses.get(proxy.id);
@@ -482,7 +503,7 @@ function initializeProxies() {
                 copy.textContent = proxy.domain;
                 copy.title = "Copy domain";
                 copy.setAttribute("aria-label", `Copy ${proxy.domain}`);
-                copy.addEventListener("click", () => copyDomain(proxy.domain));
+                copy.addEventListener("click", () => copyDomain(proxy.domain, feedback));
                 domain.append(copy);
                 const destination = row.insertCell();
                 destination.className = "proxy-destination p-0 font-mono text-xs text-secondary md:px-6 md:py-4";
@@ -622,6 +643,10 @@ function initializeProxies() {
             loadEvents();
         }
     }, 2000);
+}
+
+for (const button of document.querySelectorAll("[data-copy-domain]")) {
+    button.addEventListener("click", () => copyDomain(button.dataset.copyDomain, document.querySelector("#domain-copy-feedback")));
 }
 
 if (page !== "error" && page !== "public") {

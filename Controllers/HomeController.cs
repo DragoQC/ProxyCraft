@@ -24,6 +24,14 @@ public sealed class HomeController(
         return response is null ? Challenge() : View("Welcome", response);
     }
 
+    [HttpGet("/dashboard")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    public async Task<IActionResult> Dashboard(CancellationToken cancellationToken)
+    {
+        ViewData["Page"] = "dashboard";
+        return View("Welcome", await dashboard.GetAsync(cancellationToken, preview: true));
+    }
+
     [HttpGet("/proxies")]
     public IActionResult Proxies() => View();
 

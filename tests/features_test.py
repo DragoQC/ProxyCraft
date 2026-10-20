@@ -149,6 +149,8 @@ def verify():
                 assert {'TwoFactorSecret', 'RecoveryCodeHashes', 'LastTotpStep'} <= columns
                 assert database.execute('SELECT UsernameOrEmail,PasswordHash,SecurityStamp,TwoFactorSecret FROM users').fetchone() == ('legacy-owner', 'legacy-hash', 'legacy-stamp', None)
             admin = browser()
+            assert admin.request('/api/v1/settings/app')[1]['publicDashboardMessage'] == 'Welcome to ProxyCraft'
+            assert admin.request('/dashboard')[0] == 200
             assert admin.request('/api/v1/public/dashboard')[0] == 404
             status, route, _ = admin.request('/api/v1/proxies', 'POST', {'domain': 'public.example.test', 'destinationHost': '127.0.0.1', 'destinationPort': free_port()})
             assert status == 201
@@ -157,17 +159,26 @@ def verify():
             refresh(admin)
             anonymous = browser()
             assert anonymous.request('/')[0] == 302
+            assert anonymous.request('/dashboard')[0] == 302
             assert admin.request('/api/v1/settings/app', 'PUT', {'publicDashboardEnabled': True, 'showPublicDomains': False})[0] == 200
             status, welcome, _ = anonymous.request('/')
             assert status == 200 and 'Welcome to ProxyCraft' in welcome and 'Proxy overview' not in welcome
             assert 'public.example.test' not in welcome and 'System resources' not in welcome
-            assert anonymous.request('/api/v1/public/dashboard')[1] == {'domains': []}
+            assert anonymous.request('/api/v1/public/dashboard')[1] == {'domains': [], 'message': 'Welcome to ProxyCraft'}
             for path in ('/api/v1/proxies', '/api/v1/settings/app', '/api/v1/system/metrics', f'/api/v1/proxies/{route["id"]}/events'):
                 assert anonymous.request(path)[0] == 401, path
-            assert admin.request('/api/v1/settings/app', 'PUT', {'publicDashboardEnabled': True, 'showPublicDomains': True})[0] == 200
+            for message in ('', '   ', 'x' * 501):
+                assert admin.request('/api/v1/settings/app', 'PUT', {'publicDashboardEnabled': True, 'showPublicDomains': True, 'publicDashboardMessage': message})[0] == 400
+            message = 'Welcome, builders! <script>alert("unsafe")</script>'
+            assert admin.request('/api/v1/settings/app', 'PUT', {'publicDashboardEnabled': True, 'showPublicDomains': True, 'publicDashboardMessage': '  ' + message + '  '})[0] == 200
             public = anonymous.request('/api/v1/public/dashboard')[1]
-            assert public == {'domains': ['public.example.test']}
-            assert 'public.example.test' in anonymous.request('/')[1]
+            assert public == {'domains': ['public.example.test'], 'message': message}
+            welcome = anonymous.request('/')[1]
+            assert 'public.example.test' in welcome and 'data-copy-domain="public.example.test"' in welcome
+            assert '&lt;script&gt;' in welcome and '<script>alert("unsafe")</script>' not in welcome
+            preview = admin.request('/dashboard')[1]
+            assert 'data-page="dashboard"' in preview and 'aria-label="Main navigation"' in preview
+            assert anonymous.request('/dashboard')[0] == 302
             print('PASS: existing user survives automatic optional-column creation; anonymous welcome/domain visibility is opt-in and never grants management, metrics, or player access.', flush=True)
 
             assert admin.request('/api/v1/hubs/domains/negotiate?negotiateVersion=1', 'POST')[0] == 401
@@ -253,12 +264,18 @@ def verify():
             owner = browser()
             assert owner.request('/api/v1/authentication/login', 'POST', {**CREDENTIALS, 'twoFactorCode': codes[2]})[0] == 204
             refresh(owner)
+            assert owner.request('/api/v1/settings/app')[1]['publicDashboardMessage'] == message
             assert owner.request('/api/v1/authentication/two-factor/disable', 'POST', {'password': PASSWORD, 'code': codes[3]})[0] == 204
             plain = browser()
             assert plain.request('/api/v1/authentication/login', 'POST', CREDENTIALS)[0] == 204
             refresh(plain)
             assert plain.request('/api/v1/authentication/two-factor')[1]['isEnabled'] is False
-            assert plain.request('/api/v1/settings/app', 'PUT', {'publicDashboardEnabled': False, 'showPublicDomains': True})[0] == 200
+            status, saved, _ = plain.request('/api/v1/settings/app', 'PUT', {'publicDashboardEnabled': False, 'showPublicDomains': True})
+            assert status == 200 and saved['showPublicDomains'] is False and saved['publicDashboardMessage'] == message
+            with sqlite3.connect(data / 'proxycraft.db') as database:
+                assert database.execute('SELECT COUNT(*) FROM users').fetchone()[0] == 1
+            assert json.loads((data / 'settings.json').read_text())['showPublicDomains'] is False
+            assert 'data-page="dashboard"' in plain.request('/dashboard')[1]
             assert browser().request('/')[0] == 302
             assert Client(base).request('/api/v1/public/dashboard')[0] == 404
             print('PASS: removing 2FA requires password plus a valid code and signs out sessions; disabling the public dashboard hides the welcome page and domain API.', flush=True)

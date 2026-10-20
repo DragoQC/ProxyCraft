@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.Extensions.Options;
+using ProxyCraft.Api.Contracts;
 using ProxyCraft.Configuration;
 
 namespace ProxyCraft.Services;
@@ -35,6 +36,21 @@ public sealed class SettingsStore(
         {
             await UpdateAsync((ApplicationSettings settings) => Task.FromResult(settings), cancellationToken);
         }
+    }
+
+    public Task<ApplicationSettings> UpdatePublicDashboardAsync(UpdateAppSettingsRequest request, CancellationToken cancellationToken = default)
+    {
+        if (request.PublicDashboardMessage is not null && string.IsNullOrWhiteSpace(request.PublicDashboardMessage))
+        {
+            throw new ArgumentException("Enter a welcome message.");
+        }
+
+        return UpdateAsync((ApplicationSettings current) => Task.FromResult(current with
+        {
+            PublicDashboardEnabled = request.PublicDashboardEnabled,
+            ShowPublicDomains = request.PublicDashboardEnabled && request.ShowPublicDomains,
+            PublicDashboardMessage = request.PublicDashboardMessage?.Trim() ?? current.PublicDashboardMessage
+        }), cancellationToken);
     }
 
     public async Task<ApplicationSettings> UpdateAsync(

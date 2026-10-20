@@ -52,7 +52,7 @@ Proxmox inspired the project; it is not a requirement. Your existing servers can
 | **API reference and key** | View endpoint inputs, outputs, and examples from App Settings; generate one API key for external clients. |
 | **Optional sign-in** | Start without login; enable authentication in App Settings when you want it. |
 | **Two-factor authentication** | Add an authenticator app and one-use recovery codes to your main account. |
-| **Public welcome page** | Opt into an anonymous welcome dashboard, with a separate switch for showing domain names. |
+| **Public welcome page** | Set a custom welcome message and optionally show click-to-copy domain names. |
 | **Live domain events** | API-key-authenticated SignalR notifications when domains are added, removed, or renamed. |
 | **Automatic storage** | EF Core creates the SQLite schema on launch. No manual database setup. |
 | **Your kind of dashboard** | Clean Light, simple Dark, or full Rainbow with neon gradients and mouse-connected particles. |
@@ -163,7 +163,7 @@ Open **App Settings → Open API reference** to see each endpoint's inputs, vali
 
 In **App Settings → Two-factor authentication**, confirm your password, add the displayed time-based secret to an authenticator app, and confirm a six-digit code. Save the eight recovery codes before signing in again. Two-factor setup is optional and uses nullable fields on the existing user. See [authentication and public visibility](docs/AUTHENTICATION.md) for setup, recovery, and storage details.
 
-Enable **Public dashboard** to show anonymous visitors a simple **Welcome to ProxyCraft** page while keeping management behind sign-in. A separate checkbox allows domain names to be displayed. Both options default off; backend addresses, players, history, and resource metrics stay private.
+Enable **Public dashboard** to show anonymous visitors a welcome page while keeping management behind sign-in. Its message editor starts with **Welcome to ProxyCraft** and supports up to 500 plain-text characters. Domain visibility can be checked only while public access is enabled; turning access off clears it. Visitors can click a domain to copy it. Both visibility options default off; backend addresses, players, history, and resource metrics stay private. The admin **Dashboard** link previews the welcome page, and navigation shows icons on every screen with labels on desktop.
 
 Integrations can connect to **`/api/v1/hubs/domains`** with `X-API-Key` and listen for **`DomainAdded`** and **`DomainRemoved`**. Notifications follow saved UI/API changes; renaming emits removal then addition. Read the [domain events guide](docs/DOMAIN_EVENTS.md) for payloads, a C# client example, and reconnect behavior.
 
@@ -182,7 +182,7 @@ Your choice is remembered in this browser. On mobile, the header shows the logo 
 | File | Purpose |
 | --- | --- |
 | `App_Data/proxycraft.db` | SQLite database with `users`, `proxies`, the single-row `api_keys` table, and `connection_events`. |
-| `App_Data/settings.json` | Authentication mode and configured listener port. |
+| `App_Data/settings.json` | Authentication mode, listener port, public visibility, and welcome message. |
 | `<data-directory>/keys/` | Cookie-protection keys for installer/Docker deployments; keep with backups. |
 
 All database models inherit `BaseModel`: `created_at`, `modified_at`, and `is_active`. Creation/modification timestamps are maintained in UTC. The data directory is excluded from version control and can be changed with `Storage:Directory` or the `Storage__Directory` environment variable.

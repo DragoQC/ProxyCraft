@@ -15,19 +15,25 @@ public sealed class SettingsController(
     public AppSettingsResponse GetApp() => new(
         settings.Current.AuthenticationEnabled,
         settings.Current.PublicDashboardEnabled,
-        settings.Current.ShowPublicDomains);
+        settings.Current.PublicDashboardEnabled && settings.Current.ShowPublicDomains,
+        settings.Current.PublicDashboardMessage);
 
     [HttpPut("app")]
     [EndpointSummary("Change public dashboard visibility")]
-    [EndpointDescription("Controls the anonymous welcome page and optional domain-name list. Management endpoints, backend addresses, player history, and resource metrics remain protected when sign-in is enabled.")]
-    public async Task<AppSettingsResponse> UpdateApp(UpdateAppSettingsRequest request, CancellationToken cancellationToken)
+    [EndpointDescription("Controls the anonymous welcome page, plain-text welcome message, and optional domain-name list. Disabling the page clears domain visibility. Omit the message to preserve it; supplied messages must contain 1–500 characters with non-whitespace text. Management information remains protected when sign-in is enabled.")]
+    [ProducesResponseType<AppSettingsResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<AppSettingsResponse>> UpdateApp(UpdateAppSettingsRequest request, CancellationToken cancellationToken)
     {
-        await settings.UpdateAsync((ApplicationSettings current) => Task.FromResult(current with
+        try
         {
-            PublicDashboardEnabled = request.PublicDashboardEnabled,
-            ShowPublicDomains = request.ShowPublicDomains
-        }), cancellationToken);
-        return GetApp();
+            await settings.UpdatePublicDashboardAsync(request, cancellationToken);
+            return GetApp();
+        }
+        catch (ArgumentException exception)
+        {
+            return Problem(statusCode: StatusCodes.Status400BadRequest, title: exception.Message);
+        }
     }
 
     [HttpGet("proxy")]

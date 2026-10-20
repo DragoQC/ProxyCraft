@@ -9,14 +9,14 @@ public sealed class PublicDashboardService(
     SettingsStore settings,
     ProxyCraftDbContext database)
 {
-    public async Task<PublicDashboardResponse?> GetAsync(CancellationToken cancellationToken)
+    public async Task<PublicDashboardResponse?> GetAsync(CancellationToken cancellationToken, bool preview = false)
     {
-        if (!settings.Current.PublicDashboardEnabled)
+        if (!settings.Current.PublicDashboardEnabled && !preview)
         {
             return null;
         }
 
-        IReadOnlyList<string> domains = settings.Current.ShowPublicDomains
+        IReadOnlyList<string> domains = settings.Current.PublicDashboardEnabled && settings.Current.ShowPublicDomains
             ? await database.Proxies.AsNoTracking()
                 .Where((Proxy proxy) => proxy.IsActive)
                 .OrderBy((Proxy proxy) => proxy.Domain)
@@ -24,6 +24,6 @@ public sealed class PublicDashboardService(
                 .ToListAsync(cancellationToken)
             : [];
 
-        return new PublicDashboardResponse(domains);
+        return new PublicDashboardResponse(domains, settings.Current.PublicDashboardMessage);
     }
 }

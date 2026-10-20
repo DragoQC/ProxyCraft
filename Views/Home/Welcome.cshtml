@@ -1,10 +1,10 @@
 @model ProxyCraft.Api.Contracts.PublicDashboardResponse
 @{
     ViewData["Title"] = "Welcome";
-    ViewData["Page"] = "public";
+    ViewData["Page"] ??= "public";
 }
 <section class="card mx-auto max-w-2xl p-6 sm:p-8">
-    <h1 class="page-title">Welcome to ProxyCraft</h1>
+    <h1 class="page-title whitespace-pre-line [overflow-wrap:anywhere]">@Model.Message</h1>
     <p class="page-description">The Minecraft proxy that just works.</p>
     @if (Model.Domains.Count > 0)
     {
@@ -12,8 +12,12 @@
         <ul class="mt-3 space-y-3">
             @foreach (string domain in Model.Domains)
             {
-                <li class="[overflow-wrap:anywhere] text-sm text-accent">@domain</li>
+                <li>
+                    <button type="button" data-copy-domain="@domain" class="min-h-11 max-w-full cursor-copy [overflow-wrap:anywhere] text-left text-sm text-accent underline decoration-dotted underline-offset-4 hover:decoration-solid" aria-label="Copy @domain" title="Copy domain">@domain</button>
+                </li>
             }
         </ul>
     }
+    <p id="domain-copy-feedback" role="status" class="mt-3 text-sm text-accent">
+    </p>
 </section>

@@ -71,10 +71,39 @@
         @if (!isLogin && !isPublic)
         {
             <nav aria-label="Main navigation" class="mx-auto flex max-w-6xl flex-wrap gap-1 px-5 pb-3 sm:px-8">
-                <a href="/" class="nav-link @(actionName == "Index" ? "is-active" : "")">Home</a>
-                <a href="/proxies" class="nav-link @(actionName == "Proxies" ? "is-active" : "")">Configured proxies</a>
-                <a href="/settings/proxy" class="nav-link @(actionName == "ProxySettings" ? "is-active" : "")">Proxy Settings</a>
-                <a href="/settings/app" class="nav-link @(actionName is "AppSettings" or "Api" ? "is-active" : "")">App Settings</a>
+                <a href="/" class="nav-link @(actionName == "Index" ? "is-active" : "")" aria-label="Home" title="Home" aria-current="@(actionName == "Index" ? "page" : null)">
+                    <svg aria-hidden="true" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z" />
+                    </svg>
+                    <span class="sr-only sm:not-sr-only">Home</span>
+                </a>
+                <a href="/dashboard" class="nav-link @(actionName == "Dashboard" ? "is-active" : "")" aria-label="Dashboard" title="Dashboard" aria-current="@(actionName == "Dashboard" ? "page" : null)">
+                    <svg aria-hidden="true" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                        <path d="M3 9h18M9 9v12" />
+                    </svg>
+                    <span class="sr-only sm:not-sr-only">Dashboard</span>
+                </a>
+                <a href="/proxies" class="nav-link @(actionName == "Proxies" ? "is-active" : "")" aria-label="Configured proxies" title="Configured proxies" aria-current="@(actionName == "Proxies" ? "page" : null)">
+                    <svg aria-hidden="true" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 12h6m0 0 7-7h5M9 12l7 7h5M18 2l3 3-3 3m0 8 3 3-3 3" />
+                    </svg>
+                    <span class="sr-only sm:not-sr-only">Configured proxies</span>
+                </a>
+                <a href="/settings/proxy" class="nav-link @(actionName == "ProxySettings" ? "is-active" : "")" aria-label="Proxy Settings" title="Proxy Settings" aria-current="@(actionName == "ProxySettings" ? "page" : null)">
+                    <svg aria-hidden="true" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 3v8m0 4v6M12 3v2m0 4v12M20 3v12m0 4v2M1 11h6M9 9h6m2 6h6" />
+                    </svg>
+                    <span class="sr-only sm:not-sr-only">Proxy Settings</span>
+                </a>
+                <a href="/settings/app" class="nav-link @(actionName is "AppSettings" or "Api" ? "is-active" : "")" aria-label="App Settings" title="App Settings" aria-current="@(actionName is "AppSettings" or "Api" ? "page" : null)">
+                    <svg aria-hidden="true" class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="7" />
+                        <circle cx="12" cy="12" r="2.5" />
+                        <path d="M12 2v3m0 14v3M2 12h3m14 0h3M5 5l2 2m10 10 2 2M5 19l2-2M17 7l2-2" />
+                    </svg>
+                    <span class="sr-only sm:not-sr-only">App Settings</span>
+                </a>
             </nav>
         }
     </header>

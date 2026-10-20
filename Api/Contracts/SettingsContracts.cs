@@ -1,17 +1,22 @@
 using System.ComponentModel.DataAnnotations;
+using ProxyCraft.Configuration;
 
 namespace ProxyCraft.Api.Contracts;
 
 public sealed record AppSettingsResponse(
     bool AuthenticationEnabled,
     bool PublicDashboardEnabled = false,
-    bool ShowPublicDomains = false);
+    bool ShowPublicDomains = false,
+    string PublicDashboardMessage = ApplicationSettings.DefaultPublicDashboardMessage);
 
 public sealed class UpdateAppSettingsRequest
 {
     public bool PublicDashboardEnabled { get; set; }
 
     public bool ShowPublicDomains { get; set; }
+
+    [StringLength(500, MinimumLength = 1)]
+    public string? PublicDashboardMessage { get; set; }
 }
 
 public sealed record ProxySettingsResponse(

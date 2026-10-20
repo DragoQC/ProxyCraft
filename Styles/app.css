@@ -210,7 +210,7 @@
     }
 
     .nav-link {
-        @apply rounded-md px-3 py-2 text-sm font-medium;
+        @apply inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium;
         color: var(--ink-secondary);
     }
 

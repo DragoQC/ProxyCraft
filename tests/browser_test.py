@@ -117,6 +117,7 @@ with tempfile.TemporaryDirectory(prefix='proxycraft-browser-routes-') as tempora
             for theme in ('light', 'dark', 'rainbow'):
                 click('[data-theme-choice="' + theme + '"]')
                 assert execute('return document.documentElement.scrollWidth <= innerWidth;')
+                assert execute('return document.querySelectorAll("nav .nav-link").length === 5 && Array.from(document.querySelectorAll("nav .nav-link")).every(link => link.querySelector("svg").getBoundingClientRect().width > 0 && link.getBoundingClientRect().width >= 44 && link.getAttribute("aria-label") && (innerWidth >= 640 ? link.querySelector("span").getBoundingClientRect().width > 1 : link.querySelector("span").getBoundingClientRect().width <= 1));')
                 assert execute('return window.originalProxyRow.querySelector(".proxy-connection-count").textContent === "100" && window.originalProxyRow.querySelector(".proxy-connection-count").getBoundingClientRect().width > 0;')
                 if width < 640:
                     assert execute('return getComputedStyle(document.querySelector(\'a[aria-label="ProxyCraft home"] > span\')).display === "none" && Array.from(document.querySelectorAll(".theme-option > span:not(.rainbow-swatch)")).every(label => getComputedStyle(label).display === "none");')

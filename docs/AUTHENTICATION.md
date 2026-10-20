@@ -34,13 +34,13 @@ TOTP follows [RFC 6238](https://datatracker.ietf.org/doc/html/rfc6238). Password
 
 ## Public welcome page
 
-App Settings contains two independent settings, both off by default:
+App Settings controls the public welcome page; public access and domain visibility default off:
 
-- **Allow the welcome dashboard without signing in:** while authentication is on, an anonymous visitor to `/` sees **Welcome to ProxyCraft** and a sign-in link. Turning it off sends visitors to sign-in.
-- **Show domain names on the public dashboard:** optionally lists the configured active domain names. It has no effect while the public dashboard is disabled.
+- **Allow the welcome dashboard without signing in:** while authentication is on, an anonymous visitor to `/` sees the saved welcome message and a sign-in link. The message defaults to **Welcome to ProxyCraft**; its textbox appears when the checkbox is checked and accepts 1–500 plain-text characters. Hiding the textbox retains the saved message. Turning it off sends visitors to sign-in.
+- **Show domain names on the public dashboard:** optionally lists the configured active domain names. It is disabled and unchecked while the public dashboard is off. Turning the dashboard off also saves domain visibility as false through the API. Clicking a visible domain copies it, including on LAN HTTP dashboards.
 
-The public page has no management navigation, destination IP/port, player list, history, or resource metrics. Signed-in users retain the usual management dashboard. Disabling sign-in still grants the original open management access; the public-page setting does not turn that mode into restricted access.
+The public page has no management navigation, destination IP/port, player list, history, or resource metrics. Signed-in users retain the usual management Home and can use **Dashboard** to preview the welcome page at `/dashboard`, including before public access is enabled. That preview follows management sign-in rules and retains admin navigation; it does not enable anonymous access. Disabling sign-in still grants the original open management access; the public-page setting does not turn that mode into restricted access.
 
-`GET /api/v1/public/dashboard` is the narrow anonymous API for this page. It returns `{ "domains": [] }` when names are hidden, permitted names when visible, and 404 when the public page is disabled. It intentionally requires no API key. Management endpoints and the domain-event hub retain their authorization rules.
+`GET /api/v1/public/dashboard` is the narrow anonymous API for this page. It returns `{ "domains": [], "message": "Welcome to ProxyCraft" }` when names are hidden, the saved message and permitted names when visible, and 404 when the public page is disabled. It intentionally requires no API key. Management endpoints and the domain-event hub retain their authorization rules.
 
 `tests/features_test.py` checks schema upgrade/preservation, visibility permissions, authenticator enrollment, encrypted storage, code replay, concurrent recovery use, session invalidation, and restart persistence. `tests/account_browser_test.py` exercises the actual setup/login/removal and public-settings controls in Firefox.

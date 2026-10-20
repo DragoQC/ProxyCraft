@@ -78,6 +78,9 @@ public sealed class ApiReferenceService(
                 nameof(CreateProxyRequest.DestinationPort) or nameof(UpdateProxySettingsRequest.ListenPort) when request => "Defaults to 25565.",
                 nameof(ProxyResponse.IsReachable) => "TCP reachability; null until checked. Refreshed every 10 seconds.",
                 nameof(ProxyResponse.LastCheckedAt) => "UTC time of the latest TCP check; null until checked.",
+                nameof(UpdateAppSettingsRequest.ShowPublicDomains) => "Only available when publicDashboardEnabled is true; otherwise saved as false.",
+                nameof(UpdateAppSettingsRequest.PublicDashboardMessage) => "Plain text, 1–500 characters. Defaults to Welcome to ProxyCraft; omit to preserve the saved message.",
+                nameof(PublicDashboardResponse.Message) => "Configured plain-text welcome heading; rendered as text, never HTML.",
                 nameof(ProxyResponse.LiveConnectionCount) => "Current named forwarding sessions for this proxy, held in memory. Excludes status pings and failed backend connections.",
                 nameof(ProxySettingsResponse.ListenerError) => "Check this even on HTTP 200; a failed bind retains the previous listening port.",
                 nameof(GeneratedApiKeyResponse.ApiKey) => "Returned once. Store it safely; regeneration invalidates the old key.",
@@ -224,12 +227,16 @@ public sealed class ApiReferenceService(
 
         if (type == typeof(UpdateAppSettingsRequest))
         {
-            return JsonSerializer.Serialize(new UpdateAppSettingsRequest(), ExampleOptions);
+            return JsonSerializer.Serialize(new UpdateAppSettingsRequest
+            {
+                PublicDashboardEnabled = true,
+                PublicDashboardMessage = "Welcome to ProxyCraft"
+            }, ExampleOptions);
         }
 
         if (type == typeof(PublicDashboardResponse))
         {
-            return JsonSerializer.Serialize(new PublicDashboardResponse(["play.example.com"]), ExampleOptions);
+            return JsonSerializer.Serialize(new PublicDashboardResponse(["play.example.com"], "Welcome to ProxyCraft"), ExampleOptions);
         }
 
         if (type == typeof(TwoFactorSettingsResponse))
