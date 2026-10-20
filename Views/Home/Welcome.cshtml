@@ -4,8 +4,8 @@
     ViewData["Page"] ??= "public";
 }
 <section class="card mx-auto max-w-2xl p-6 sm:p-8">
-    <h1 class="page-title whitespace-pre-line [overflow-wrap:anywhere]">@Model.Message</h1>
-    <p class="page-description">The Minecraft proxy that just works.</p>
+    <h1 class="page-title whitespace-pre-line [overflow-wrap:anywhere]">@Model.Title</h1>
+    <p class="page-description whitespace-pre-line [overflow-wrap:anywhere]">@Model.Message</p>
     @if (Model.Domains.Count > 0)
     {
         <h2 class="mt-8 font-semibold">Minecraft domains</h2>

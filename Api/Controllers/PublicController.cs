@@ -11,7 +11,7 @@ public sealed class PublicController(PublicDashboardService dashboard) : Control
 {
     [HttpGet("dashboard")]
     [EndpointSummary("Read the optional public welcome dashboard")]
-    [EndpointDescription("Returns the configured plain-text welcome message and public domain names when visibility is enabled. Hidden names produce an empty array. Never exposes destinations, players, metrics, or management access. Returns 404 when the public dashboard is disabled.")]
+    [EndpointDescription("Returns the configured plain-text welcome title and paragraph, plus public domain names when visibility is enabled. Hidden names produce an empty array. Never exposes destinations, players, metrics, or management access. Returns 404 when the public dashboard is disabled.")]
     [ProducesResponseType<PublicDashboardResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<PublicDashboardResponse>> Get(CancellationToken cancellationToken)

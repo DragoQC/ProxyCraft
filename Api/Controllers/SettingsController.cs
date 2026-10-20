@@ -16,11 +16,12 @@ public sealed class SettingsController(
         settings.Current.AuthenticationEnabled,
         settings.Current.PublicDashboardEnabled,
         settings.Current.PublicDashboardEnabled && settings.Current.ShowPublicDomains,
-        settings.Current.PublicDashboardMessage);
+        settings.Current.PublicDashboardMessage,
+        settings.Current.PublicDashboardTitle);
 
     [HttpPut("app")]
     [EndpointSummary("Change public dashboard visibility")]
-    [EndpointDescription("Controls the anonymous welcome page, plain-text welcome message, and optional domain-name list. Disabling the page clears domain visibility. Omit the message to preserve it; supplied messages must contain 1–500 characters with non-whitespace text. Management information remains protected when sign-in is enabled.")]
+    [EndpointDescription("Controls the anonymous welcome page, plain-text title/paragraph, and optional domain-name list. Disabling the page clears domain visibility. Omitted text fields are preserved; supplied titles require 1–120 characters and messages 1–500, each containing non-whitespace text. Management information remains protected when sign-in is enabled.")]
     [ProducesResponseType<AppSettingsResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<AppSettingsResponse>> UpdateApp(UpdateAppSettingsRequest request, CancellationToken cancellationToken)

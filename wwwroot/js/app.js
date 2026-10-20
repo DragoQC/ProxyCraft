@@ -115,16 +115,19 @@ async function initialize() {
         const publicEnabled = document.querySelector("#publicDashboardEnabled");
         const publicDomains = document.querySelector("#showPublicDomains");
         const publicMessage = document.querySelector("#publicDashboardMessage");
+        const publicTitle = document.querySelector("#publicDashboardTitle");
         publicEnabled.checked = settings.publicDashboardEnabled;
         publicEnabled.disabled = false;
         publicDomains.checked = settings.showPublicDomains;
         publicMessage.value = settings.publicDashboardMessage;
+        publicTitle.value = settings.publicDashboardTitle;
         function updatePublicFields() {
             publicDomains.disabled = !publicEnabled.checked;
             if (!publicEnabled.checked) {
                 publicDomains.checked = false;
             }
             publicMessage.disabled = !publicEnabled.checked;
+            publicTitle.disabled = !publicEnabled.checked;
             document.querySelector("#public-message-fields").classList.toggle("hidden", !publicEnabled.checked);
             document.querySelector("#public-domains-label").classList.toggle("text-muted", !publicEnabled.checked);
             document.querySelector("#public-domains-label").classList.toggle("text-body", publicEnabled.checked);
@@ -135,9 +138,11 @@ async function initialize() {
             const saved = await api("/settings/app", { method: "PUT", body: JSON.stringify({
                 publicDashboardEnabled: data.has("publicDashboardEnabled"),
                 showPublicDomains: data.has("showPublicDomains"),
-                publicDashboardMessage: data.get("publicDashboardMessage")
+                publicDashboardMessage: data.get("publicDashboardMessage"),
+                publicDashboardTitle: data.get("publicDashboardTitle")
             }) });
             publicMessage.value = saved.publicDashboardMessage;
+            publicTitle.value = saved.publicDashboardTitle;
             publicDomains.checked = saved.showPublicDomains;
             updatePublicFields();
             document.querySelector("#public-settings-status").textContent = "Public dashboard settings saved.";

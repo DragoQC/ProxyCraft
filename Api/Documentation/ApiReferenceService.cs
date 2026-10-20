@@ -79,8 +79,10 @@ public sealed class ApiReferenceService(
                 nameof(ProxyResponse.IsReachable) => "TCP reachability; null until checked. Refreshed every 10 seconds.",
                 nameof(ProxyResponse.LastCheckedAt) => "UTC time of the latest TCP check; null until checked.",
                 nameof(UpdateAppSettingsRequest.ShowPublicDomains) => "Only available when publicDashboardEnabled is true; otherwise saved as false.",
-                nameof(UpdateAppSettingsRequest.PublicDashboardMessage) => "Plain text, 1–500 characters. Defaults to Welcome to ProxyCraft; omit to preserve the saved message.",
-                nameof(PublicDashboardResponse.Message) => "Configured plain-text welcome heading; rendered as text, never HTML.",
+                nameof(UpdateAppSettingsRequest.PublicDashboardMessage) => "Plain-text paragraph, 1–500 characters. Defaults to The Minecraft proxy that just works.; omit to preserve the saved message.",
+                nameof(UpdateAppSettingsRequest.PublicDashboardTitle) => "Plain-text heading, 1–120 characters. Defaults to Welcome to ProxyCraft; omit to preserve the saved title.",
+                nameof(PublicDashboardResponse.Message) => "Configured plain-text paragraph below the title; never interpreted as HTML.",
+                nameof(PublicDashboardResponse.Title) => "Configured plain-text welcome heading; never interpreted as HTML.",
                 nameof(ProxyResponse.LiveConnectionCount) => "Current named forwarding sessions for this proxy, held in memory. Excludes status pings and failed backend connections.",
                 nameof(ProxySettingsResponse.ListenerError) => "Check this even on HTTP 200; a failed bind retains the previous listening port.",
                 nameof(GeneratedApiKeyResponse.ApiKey) => "Returned once. Store it safely; regeneration invalidates the old key.",
@@ -230,13 +232,14 @@ public sealed class ApiReferenceService(
             return JsonSerializer.Serialize(new UpdateAppSettingsRequest
             {
                 PublicDashboardEnabled = true,
-                PublicDashboardMessage = "Welcome to ProxyCraft"
+                PublicDashboardMessage = "The Minecraft proxy that just works.",
+                PublicDashboardTitle = "Welcome to ProxyCraft"
             }, ExampleOptions);
         }
 
         if (type == typeof(PublicDashboardResponse))
         {
-            return JsonSerializer.Serialize(new PublicDashboardResponse(["play.example.com"], "Welcome to ProxyCraft"), ExampleOptions);
+            return JsonSerializer.Serialize(new PublicDashboardResponse(["play.example.com"], "The Minecraft proxy that just works.", "Welcome to ProxyCraft"), ExampleOptions);
         }
 
         if (type == typeof(TwoFactorSettingsResponse))

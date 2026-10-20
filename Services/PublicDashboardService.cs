@@ -24,6 +24,6 @@ public sealed class PublicDashboardService(
                 .ToListAsync(cancellationToken)
             : [];
 
-        return new PublicDashboardResponse(domains, settings.Current.PublicDashboardMessage);
+        return new PublicDashboardResponse(domains, settings.Current.PublicDashboardMessage, settings.Current.PublicDashboardTitle);
     }
 }

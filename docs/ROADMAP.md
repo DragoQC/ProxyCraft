@@ -18,8 +18,8 @@
 - [x] Start without login, then optionally set up a main account in App Settings and require sign-in.
 - [x] Hashed passwords, cookie sessions, CSRF protection, session validation, and login rate limiting.
 - [x] Optional authenticator-app 2FA with encrypted user fields, code replay prevention, recovery codes, and confirmed setup/removal.
-- [x] Opt-in anonymous welcome dashboard with an editable plain-text message, dependent domain visibility, and click-to-copy names; management information remains protected.
-- [x] Admin Dashboard preview link and persistent navigation icons with mobile icon-only labels.
+- [x] Opt-in anonymous welcome dashboard with an editable plain-text title and paragraph, dependent domain visibility, and click-to-copy names; management information remains protected.
+- [x] Admin Dashboard preview link and persistent navigation icons with evenly spaced mobile icon-only labels.
 - [x] Key-authenticated SignalR domain-add/remove events, including renames and revoked-key rejection, documented in the custom API reference.
 - [x] Human-readable contracts, explicit conditional blocks, consistent source formatting, and expanded Razor/styles without a UI redesign.
 - [x] Search proxies at the top left, add (+) at the top right, and list saved configurations.

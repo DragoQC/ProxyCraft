@@ -45,11 +45,17 @@ public sealed class SettingsStore(
             throw new ArgumentException("Enter a welcome message.");
         }
 
+        if (request.PublicDashboardTitle is not null && string.IsNullOrWhiteSpace(request.PublicDashboardTitle))
+        {
+            throw new ArgumentException("Enter a welcome title.");
+        }
+
         return UpdateAsync((ApplicationSettings current) => Task.FromResult(current with
         {
             PublicDashboardEnabled = request.PublicDashboardEnabled,
             ShowPublicDomains = request.PublicDashboardEnabled && request.ShowPublicDomains,
-            PublicDashboardMessage = request.PublicDashboardMessage?.Trim() ?? current.PublicDashboardMessage
+            PublicDashboardMessage = request.PublicDashboardMessage?.Trim() ?? current.PublicDashboardMessage,
+            PublicDashboardTitle = request.PublicDashboardTitle?.Trim() ?? current.PublicDashboardTitle
         }), cancellationToken);
     }
 

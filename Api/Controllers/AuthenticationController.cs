@@ -41,7 +41,8 @@ public sealed class AuthenticationController(
 
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return new AppSettingsResponse(true, settings.Current.PublicDashboardEnabled,
-            settings.Current.PublicDashboardEnabled && settings.Current.ShowPublicDomains, settings.Current.PublicDashboardMessage);
+            settings.Current.PublicDashboardEnabled && settings.Current.ShowPublicDomains,
+            settings.Current.PublicDashboardMessage, settings.Current.PublicDashboardTitle);
     }
 
     [HttpPost("disable")]
@@ -52,7 +53,8 @@ public sealed class AuthenticationController(
         await authentication.DisableAsync(cancellationToken);
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return new AppSettingsResponse(false, settings.Current.PublicDashboardEnabled,
-            settings.Current.PublicDashboardEnabled && settings.Current.ShowPublicDomains, settings.Current.PublicDashboardMessage);
+            settings.Current.PublicDashboardEnabled && settings.Current.ShowPublicDomains,
+            settings.Current.PublicDashboardMessage, settings.Current.PublicDashboardTitle);
     }
 
     [AllowAnonymous, HttpPost("login"), EnableRateLimiting("login")]

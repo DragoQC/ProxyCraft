@@ -13,10 +13,17 @@
                 <input id="publicDashboardEnabled" name="publicDashboardEnabled" type="checkbox" class="size-4" aria-controls="public-message-fields" disabled />
                 Allow the welcome dashboard without signing in
             </label>
-            <div id="public-message-fields" class="hidden">
-                <label for="publicDashboardMessage" class="field-label">Welcome message</label>
-                <textarea id="publicDashboardMessage" name="publicDashboardMessage" class="field resize-y" rows="3" maxlength="500" required disabled>@ProxyCraft.Configuration.ApplicationSettings.DefaultPublicDashboardMessage</textarea>
-                <p class="mt-2 text-xs text-muted">Shown on the welcome dashboard. Up to 500 characters; plain text only.</p>
+            <div id="public-message-fields" class="hidden space-y-4">
+                <div>
+                    <label for="publicDashboardTitle" class="field-label">Welcome title</label>
+                    <input id="publicDashboardTitle" name="publicDashboardTitle" class="field" maxlength="120" value="@ProxyCraft.Configuration.ApplicationSettings.DefaultPublicDashboardTitle" required disabled />
+                    <p class="mt-2 text-xs text-muted">The page heading. Up to 120 characters; plain text only.</p>
+                </div>
+                <div>
+                    <label for="publicDashboardMessage" class="field-label">Welcome message</label>
+                    <textarea id="publicDashboardMessage" name="publicDashboardMessage" class="field resize-y" rows="3" maxlength="500" required disabled>@ProxyCraft.Configuration.ApplicationSettings.DefaultPublicDashboardMessage</textarea>
+                    <p class="mt-2 text-xs text-muted">The paragraph below the title. Up to 500 characters; plain text only.</p>
+                </div>
             </div>
             <label id="public-domains-label" class="flex items-center gap-3 text-sm text-muted">
                 <input id="showPublicDomains" name="showPublicDomains" type="checkbox" class="size-4 disabled:cursor-not-allowed" disabled />

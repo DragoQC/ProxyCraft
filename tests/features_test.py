@@ -97,6 +97,8 @@ def verify():
             database.execute("INSERT INTO users VALUES (1, 'legacy-owner', 'LEGACY-OWNER', 'legacy-hash', 'legacy-stamp', '2026-01-01', NULL, 1)")
             database.execute('CREATE TABLE proxies (Id INTEGER PRIMARY KEY AUTOINCREMENT, Domain TEXT NOT NULL UNIQUE, DestinationHost TEXT NOT NULL, DestinationPort INTEGER NOT NULL, created_at TEXT NOT NULL, modified_at TEXT NULL, is_active INTEGER NOT NULL)')
         web_port, game_port = free_port(), free_port()
+        legacy_settings = json.dumps({'listenPort': game_port, 'publicDashboardMessage': 'Legacy welcome text'})
+        (data / 'settings.json').write_text(legacy_settings)
         base = f'http://127.0.0.1:{web_port}'
         log = (directory / 'app.log').open('a')
         app = None
@@ -149,7 +151,10 @@ def verify():
                 assert {'TwoFactorSecret', 'RecoveryCodeHashes', 'LastTotpStep'} <= columns
                 assert database.execute('SELECT UsernameOrEmail,PasswordHash,SecurityStamp,TwoFactorSecret FROM users').fetchone() == ('legacy-owner', 'legacy-hash', 'legacy-stamp', None)
             admin = browser()
-            assert admin.request('/api/v1/settings/app')[1]['publicDashboardMessage'] == 'Welcome to ProxyCraft'
+            initial = admin.request('/api/v1/settings/app')[1]
+            assert initial['publicDashboardMessage'] == 'Legacy welcome text'
+            assert initial['publicDashboardTitle'] == 'Welcome to ProxyCraft'
+            assert (data / 'settings.json').read_text() == legacy_settings
             assert admin.request('/dashboard')[0] == 200
             assert admin.request('/api/v1/public/dashboard')[0] == 404
             status, route, _ = admin.request('/api/v1/proxies', 'POST', {'domain': 'public.example.test', 'destinationHost': '127.0.0.1', 'destinationPort': free_port()})
@@ -164,18 +169,25 @@ def verify():
             status, welcome, _ = anonymous.request('/')
             assert status == 200 and 'Welcome to ProxyCraft' in welcome and 'Proxy overview' not in welcome
             assert 'public.example.test' not in welcome and 'System resources' not in welcome
-            assert anonymous.request('/api/v1/public/dashboard')[1] == {'domains': [], 'message': 'Welcome to ProxyCraft'}
+            assert anonymous.request('/api/v1/public/dashboard')[1] == {'domains': [], 'message': 'Legacy welcome text', 'title': 'Welcome to ProxyCraft'}
             for path in ('/api/v1/proxies', '/api/v1/settings/app', '/api/v1/system/metrics', f'/api/v1/proxies/{route["id"]}/events'):
                 assert anonymous.request(path)[0] == 401, path
             for message in ('', '   ', 'x' * 501):
                 assert admin.request('/api/v1/settings/app', 'PUT', {'publicDashboardEnabled': True, 'showPublicDomains': True, 'publicDashboardMessage': message})[0] == 400
+            for title in ('', '   ', 'x' * 121):
+                assert admin.request('/api/v1/settings/app', 'PUT', {'publicDashboardEnabled': True, 'showPublicDomains': True, 'publicDashboardTitle': title})[0] == 400
+            title = '<b>Builders gate</b>'
+            saved = admin.request('/api/v1/settings/app', 'PUT', {'publicDashboardEnabled': True, 'publicDashboardTitle': '  ' + title + '  '})[1]
+            assert saved['publicDashboardTitle'] == title and saved['publicDashboardMessage'] == 'Legacy welcome text'
             message = 'Welcome, builders! <script>alert("unsafe")</script>'
             assert admin.request('/api/v1/settings/app', 'PUT', {'publicDashboardEnabled': True, 'showPublicDomains': True, 'publicDashboardMessage': '  ' + message + '  '})[0] == 200
             public = anonymous.request('/api/v1/public/dashboard')[1]
-            assert public == {'domains': ['public.example.test'], 'message': message}
+            assert public == {'domains': ['public.example.test'], 'message': message, 'title': title}
             welcome = anonymous.request('/')[1]
             assert 'public.example.test' in welcome and 'data-copy-domain="public.example.test"' in welcome
             assert '&lt;script&gt;' in welcome and '<script>alert("unsafe")</script>' not in welcome
+            assert re.search(r'<h1[^>]*>&lt;b&gt;Builders gate&lt;/b&gt;</h1>', welcome)
+            assert re.search(r'<p class="page-description[^>]*>Welcome, builders! &lt;script&gt;', welcome)
             preview = admin.request('/dashboard')[1]
             assert 'data-page="dashboard"' in preview and 'aria-label="Main navigation"' in preview
             assert anonymous.request('/dashboard')[0] == 302
@@ -265,6 +277,7 @@ def verify():
             assert owner.request('/api/v1/authentication/login', 'POST', {**CREDENTIALS, 'twoFactorCode': codes[2]})[0] == 204
             refresh(owner)
             assert owner.request('/api/v1/settings/app')[1]['publicDashboardMessage'] == message
+            assert owner.request('/api/v1/settings/app')[1]['publicDashboardTitle'] == title
             assert owner.request('/api/v1/authentication/two-factor/disable', 'POST', {'password': PASSWORD, 'code': codes[3]})[0] == 204
             plain = browser()
             assert plain.request('/api/v1/authentication/login', 'POST', CREDENTIALS)[0] == 204
@@ -272,6 +285,7 @@ def verify():
             assert plain.request('/api/v1/authentication/two-factor')[1]['isEnabled'] is False
             status, saved, _ = plain.request('/api/v1/settings/app', 'PUT', {'publicDashboardEnabled': False, 'showPublicDomains': True})
             assert status == 200 and saved['showPublicDomains'] is False and saved['publicDashboardMessage'] == message
+            assert saved['publicDashboardTitle'] == title
             with sqlite3.connect(data / 'proxycraft.db') as database:
                 assert database.execute('SELECT COUNT(*) FROM users').fetchone()[0] == 1
             assert json.loads((data / 'settings.json').read_text())['showPublicDomains'] is False

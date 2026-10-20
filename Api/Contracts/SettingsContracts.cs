@@ -7,7 +7,8 @@ public sealed record AppSettingsResponse(
     bool AuthenticationEnabled,
     bool PublicDashboardEnabled = false,
     bool ShowPublicDomains = false,
-    string PublicDashboardMessage = ApplicationSettings.DefaultPublicDashboardMessage);
+    string PublicDashboardMessage = ApplicationSettings.DefaultPublicDashboardMessage,
+    string PublicDashboardTitle = ApplicationSettings.DefaultPublicDashboardTitle);
 
 public sealed class UpdateAppSettingsRequest
 {
@@ -17,6 +18,9 @@ public sealed class UpdateAppSettingsRequest
 
     [StringLength(500, MinimumLength = 1)]
     public string? PublicDashboardMessage { get; set; }
+
+    [StringLength(120, MinimumLength = 1)]
+    public string? PublicDashboardTitle { get; set; }
 }
 
 public sealed record ProxySettingsResponse(

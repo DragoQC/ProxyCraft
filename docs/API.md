@@ -11,9 +11,9 @@ The MVC UI and external clients use `/api/v1`. Endpoints delegate to the same ap
 | POST | `/api/v1/authentication/login` | Username/email and password, plus `twoFactorCode` when enabled; sets a cookie only after both factors pass; 204 |
 | POST | `/api/v1/authentication/logout` | Clear the caller's session cookie; returns 204 |
 | POST | `/api/v1/authentication/disable` | Disable auth and sign out; requires sign-in while auth is enabled |
-| GET | `/api/v1/settings/app` | Read `authenticationEnabled`, `publicDashboardEnabled`, `showPublicDomains`, and `publicDashboardMessage` |
-| PUT | `/api/v1/settings/app` | Save public visibility, domain visibility, and the welcome message; authentication stays unchanged |
-| GET | `/api/v1/public/dashboard` | Anonymous welcome-page data: `message` and allowed `domains`, or 404 when disabled |
+| GET | `/api/v1/settings/app` | Read `authenticationEnabled`, `publicDashboardEnabled`, `showPublicDomains`, `publicDashboardMessage`, and `publicDashboardTitle` |
+| PUT | `/api/v1/settings/app` | Save public visibility, domain visibility, and the welcome title/paragraph; authentication stays unchanged |
+| GET | `/api/v1/public/dashboard` | Anonymous welcome-page data: `title`, `message`, and allowed `domains`, or 404 when disabled |
 | GET | `/api/v1/authentication/two-factor` | Account cookie required: `isEnabled` and `recoveryCodesRemaining` |
 | POST | `/api/v1/authentication/two-factor/setup` | Account cookie and `password`: return `secret`, `authenticatorUri`, and ten-minute `setupToken` |
 | POST | `/api/v1/authentication/two-factor/confirm` | Account cookie, `setupToken`, and six-digit `code`: enable 2FA, return eight `recoveryCodes` once, sign out sessions |
@@ -30,7 +30,7 @@ The MVC UI and external clients use `/api/v1`. Endpoints delegate to the same ap
 | GET | `/api/v1/settings/api-key` | Read `isConfigured` and display `keyPrefix`; never returns the secret or hash |
 | POST | `/api/v1/settings/api-key` | Generate or replace the single API key; returns `apiKey` and `keyPrefix` once |
 
-Once an API key is configured, external management requests require a valid `X-API-Key`, including session bootstrap and login. The explicit public dashboard endpoint is anonymous and exposes the configured welcome message and opted-in names only. Two-factor endpoints require an authenticated account cookie; a key alone cannot enroll or remove a factor. Invalid keys on management endpoints return **401**. Before a key is configured, the previous cookie/session flow remains available.
+Once an API key is configured, external management requests require a valid `X-API-Key`, including session bootstrap and login. The explicit public dashboard endpoint is anonymous and exposes the configured welcome title/paragraph and opted-in names only. Two-factor endpoints require an authenticated account cookie; a key alone cannot enroll or remove a factor. Invalid keys on management endpoints return **401**. Before a key is configured, the previous cookie/session flow remains available.
 
 The SignalR hub at `/api/v1/hubs/domains` requires an API key even when dashboard login is off. It emits `DomainAdded` and `DomainRemoved` with `proxyId`, `domain`, and UTC `occurredAt`. Renaming emits both. See the [event guide](DOMAIN_EVENTS.md) for the C# integration example, authenticated transports, key rotation, and snapshot reconciliation after reconnecting.
 
@@ -178,8 +178,8 @@ Full Minecraft status details, multi-user management, and 2FA endpoints are not 
 
 ### Public dashboard settings
 
-`PUT /api/v1/settings/app` accepts `publicDashboardEnabled`, `showPublicDomains`, and optional `publicDashboardMessage`. The message defaults to `Welcome to ProxyCraft`, must contain non-whitespace text within 1–500 characters, is trimmed before saving, and is always rendered as text. Omitted/null messages retain the saved value, including when hiding the editor. Invalid supplied messages return 400 without changing settings.
+`PUT /api/v1/settings/app` accepts `publicDashboardEnabled`, `showPublicDomains`, optional `publicDashboardTitle`, and optional `publicDashboardMessage`. The title defaults to `Welcome to ProxyCraft` (1–120 characters), and the paragraph defaults to `The Minecraft proxy that just works.` (1–500 characters). Both must contain non-whitespace text, are trimmed before saving, and are rendered as text. Omitted/null text fields retain their saved values, including when hiding the editors. Invalid supplied text returns 400 without changing settings. Existing saved messages become the paragraph; missing titles use the default without rewriting the settings file at startup.
 
 Turning public access off forces `showPublicDomains` to false, even if an external caller sends true. Re-enabling does not automatically re-enable domain visibility. Settings remain in `settings.json`; no database schema change is needed.
 
-`GET /api/v1/public/dashboard` returns `{ "domains": ["play.example.com"], "message": "Welcome to ProxyCraft" }` when both visibility options are on. Hidden names produce an empty array; disabling public access returns 404. MVC `/dashboard` is an admin preview using the normal management access rules; anonymous visitors still use `/` when enabled. Public domain buttons copy names without making management API calls.
+`GET /api/v1/public/dashboard` returns `{ "domains": ["play.example.com"], "message": "The Minecraft proxy that just works.", "title": "Welcome to ProxyCraft" }` when both visibility options are on. Hidden names produce an empty array; disabling public access returns 404. MVC `/dashboard` is an admin preview using the normal management access rules; anonymous visitors still use `/` when enabled. Public domain buttons copy names without making management API calls.
