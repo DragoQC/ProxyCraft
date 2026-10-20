@@ -65,6 +65,6 @@ This is a live, best-effort feed. Notifications are not stored or replayed. Afte
 
 Before publishing, the server checks subscribers against the currently active key hash and closes revoked subscribers. A failed or slow subscriber cannot roll back a saved route; delivery waits at most five seconds. There is no distributed backplane or durable event queue.
 
-The custom `/settings/api` page includes the hub's path, inputs, outputs, and notification names. `tests/features_test.py` uses a real WebSocket and SignalR JSON handshake to verify additions, renames, deletions, authentication, and key rotation.
+The custom `/settings/api` page includes the hub's path, inputs, outputs, and notification names.
 
 Implementation follows the .NET 10 documentation for [SignalR hubs](https://learn.microsoft.com/en-us/aspnet/core/signalr/hubs?view=aspnetcore-10.0) and [authentication and authorization](https://learn.microsoft.com/en-us/aspnet/core/signalr/authn-and-authz?view=aspnetcore-10.0).

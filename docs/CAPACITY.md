@@ -2,15 +2,11 @@
 
 The current proxy passed a local test with **100 concurrent named forwarding sessions**, including a simultaneous login burst, verified bidirectional traffic, API polling, and complete disconnect cleanup. No backend changes were needed for that target. This is a measured workload on the development host; it does not establish a universal player limit or simulate a full modded Minecraft session.
 
-## Repeat the capacity check
+## Recorded capacity check
 
-After `dotnet build --no-restore`, run:
+These measurements were recorded before the test scripts were removed from the repository.
 
-```bash
-python3 tests/capacity_test.py
-```
-
-The standard-library test starts the real app and a local echo backend on unused ports, with temporary SQLite/settings. It launches 100 login attempts concurrently, holds all 100 sockets open, checks distinct session identities, and relays traffic on every connection while polling live/history/metrics APIs. History must remain at 20. Closing every connection must clear the live list and retain the saved attempts. No production routes, players, or database are used.
+The check started the real app and a local echo backend on unused ports, with temporary SQLite/settings. It launched 100 login attempts concurrently, held all 100 sockets open, checked distinct session identities, and relayed traffic on every connection while polling live/history/metrics APIs. History stayed at 20. Closing every connection cleared the live list and retained the saved attempts. No production routes, players, or database were used.
 
 One local Linux run on October 20, 2026 produced:
 
@@ -26,7 +22,7 @@ One local Linux run on October 20, 2026 produced:
 | Peak open file descriptors | 532 |
 | Saved history | Exactly 20 entries for the proxy |
 
-These resource samples include the .NET process and its dependencies. They do not include the Python test clients/backend, kernel socket buffers, or the actual Minecraft server. The short test covers connection handling and correctness; it is not a long-duration soak test or a throughput guarantee. Repeating it prints measurements for the current host.
+These resource samples include the .NET process and its dependencies. They do not include the Python test clients/backend, kernel socket buffers, or the actual Minecraft server. The short check covered connection handling and correctness; it was not a long-duration soak test or a throughput guarantee.
 
 ## Why 100 connections fit the design
 
@@ -45,10 +41,4 @@ Unchanged polls skip rendering. A changed snapshot is applied in one document-fr
 
 Configured proxies use a desktop table and separate cards below 768px. Each mobile card shows the domain, labeled destination, backend status, and 44px live/history/edit/delete controls. The header uses the logo and theme icons below 640px, with accessible labels. Rainbow effects run automatically when selected, respect reduced motion, and pause in hidden tabs.
 
-With Firefox installed, run the browser check after a Debug build:
-
-```bash
-python3 tests/browser_test.py
-```
-
-It uses a fresh Firefox profile and temporary app data, opens 100 real forwarded sessions, and checks the 100-entry live list and 20-entry history at 1440px, 768px, 390px, and 320px in all three themes. It also checks scroll anchoring during joins/disconnects, keyboard scrolling, mobile actions, the retired effects preference, and device reduced-motion changes. Screenshots are written to the temporary directory printed by the test. No browser packages, Node, or external test service are required.
+Historical Firefox checks used a fresh browser profile and temporary app data, opened 100 real forwarded sessions, and checked the 100-entry live list and 20-entry history at 1440px, 768px, 390px, and 320px in all three themes. They also checked scroll anchoring during joins/disconnects, keyboard scrolling, mobile actions, the retired effects preference, and device reduced-motion changes.

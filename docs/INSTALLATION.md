@@ -57,8 +57,6 @@ Port mappings must match the listener configured in Proxy Settings. For example,
 
 Resource cards can only read limits exposed inside the container's cgroup namespace. Some Docker hosts enforce additional CPU limits in a parent group that is hidden from the container.
 
-After building the image, `python3 tests/docker_test.py` checks production startup, published Minecraft forwarding, visible resource counters, and data/login persistence across recreation. It creates and removes only its own temporary containers and volume. `python3 tests/install_test.py` simulates package/service commands in temporary storage, including the curl/stdin flow, updates, and rollback; it makes no host installation changes.
-
 ## Deployment configuration
 
 | Environment variable | Supplied value / behavior |
