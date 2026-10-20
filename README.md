@@ -56,3 +56,5 @@ Uses the same **8080** dashboard and **25565** Minecraft ports. Keep the `proxyc
 ---
 
 [Installation & updates](docs/INSTALLATION.md) · [Authentication](docs/AUTHENTICATION.md) · [API](docs/API.md) · [Capacity](docs/CAPACITY.md) · [Architecture](docs/ARCHITECTURE.md) · [Roadmap](docs/ROADMAP.md)
+
+**License:** [MIT](LICENSE). Free to use, modify, share, and sell; keep the copyright and license notice.
