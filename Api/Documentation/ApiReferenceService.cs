@@ -79,7 +79,7 @@ public sealed class ApiReferenceService(
                 nameof(ProxyResponse.IsReachable) => "TCP reachability; null until checked. Refreshed every 10 seconds.",
                 nameof(ProxyResponse.LastCheckedAt) => "UTC time of the latest TCP check; null until checked.",
                 nameof(UpdateAppSettingsRequest.ShowPublicDomains) => "Only available when publicDashboardEnabled is true; otherwise saved as false.",
-                nameof(UpdateAppSettingsRequest.PublicDashboardMessage) => "Plain-text paragraph, 1–500 characters. Defaults to The Minecraft proxy that just works.; omit to preserve the saved message.",
+                nameof(UpdateAppSettingsRequest.PublicDashboardMessage) => "Optional plain-text paragraph, 0–500 characters. Send an empty string to clear it; omit/null to preserve the saved value. Defaults to The Minecraft proxy that just works.",
                 nameof(UpdateAppSettingsRequest.PublicDashboardTitle) => "Plain-text heading, 1–120 characters. Defaults to Welcome to ProxyCraft; omit to preserve the saved title.",
                 nameof(PublicDashboardResponse.Message) => "Configured plain-text paragraph below the title; never interpreted as HTML.",
                 nameof(PublicDashboardResponse.Title) => "Configured plain-text welcome heading; never interpreted as HTML.",

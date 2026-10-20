@@ -21,7 +21,7 @@ public sealed class SettingsController(
 
     [HttpPut("app")]
     [EndpointSummary("Change public dashboard visibility")]
-    [EndpointDescription("Controls the anonymous welcome page, plain-text title/paragraph, and optional domain-name list. Disabling the page clears domain visibility. Omitted text fields are preserved; supplied titles require 1–120 characters and messages 1–500, each containing non-whitespace text. Management information remains protected when sign-in is enabled.")]
+    [EndpointDescription("Controls the anonymous welcome page, plain-text title/paragraph, and optional domain-name list. Disabling the page clears domain visibility. Omitted/null text fields are preserved; titles require 1–120 characters with non-whitespace text. Messages allow 0–500 characters; send an empty string to clear the paragraph. Management information remains protected when sign-in is enabled.")]
     [ProducesResponseType<AppSettingsResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<AppSettingsResponse>> UpdateApp(UpdateAppSettingsRequest request, CancellationToken cancellationToken)

@@ -116,9 +116,17 @@ with tempfile.TemporaryDirectory(prefix='proxycraft-browser-routes-') as tempora
             click('[data-theme-choice="' + theme + '"]')
             assert execute('const cards = Array.from(document.querySelectorAll("#app-settings-cards > section")).filter(card => card.getClientRects().length); return cards.length === 4 && new Set(cards.map(card => Math.round(card.getBoundingClientRect().left))).size === 2 && cards.every(card => card.getClientRects().length === 1) && document.documentElement.scrollWidth <= innerWidth;')
             screenshot('account-settings-' + theme + '-desktop')
+            assert execute('const picker = document.querySelector(".theme-picker").getBoundingClientRect(); const button = document.querySelector("#logout").getBoundingClientRect(); return Math.abs(button.height - picker.height) < 1 && Math.abs(button.top - picker.top) < 1;')
         click('#publicDashboardEnabled')
         assert execute('return !document.querySelector("#showPublicDomains").disabled && !document.querySelector("#publicDashboardMessage").disabled && !document.querySelector("#publicDashboardTitle").disabled && document.querySelector("#publicDashboardMessage").value === "The Minecraft proxy that just works." && document.querySelector("#publicDashboardTitle").value === "Welcome to ProxyCraft";')
         click('#showPublicDomains')
+        execute('document.querySelector("#publicDashboardMessage").value = "";')
+        click('#public-dashboard-settings button[type="submit"]')
+        wait_for('return document.querySelector("#public-settings-status").textContent.includes("saved");')
+        command('WebDriver:Navigate', {'url': base + '/settings/app'})
+        wait_for('return !document.querySelector("#generate-api-key").disabled;')
+        assert execute('return document.querySelector("#publicDashboardMessage").value === "" && !document.querySelector("#publicDashboardMessage").required;')
+        assert 'page-description' not in Client(base).request('/')[1]
         execute('document.querySelector("#publicDashboardMessage").value = "Welcome, builders!"; document.querySelector("#publicDashboardTitle").value = "Builders gate";')
         click('#publicDashboardEnabled')
         assert execute('return document.querySelector("#showPublicDomains").disabled && !document.querySelector("#showPublicDomains").checked && document.querySelector("#public-message-fields").classList.contains("hidden");')
@@ -134,6 +142,9 @@ with tempfile.TemporaryDirectory(prefix='proxycraft-browser-routes-') as tempora
         assert execute('return document.querySelector(\'nav a[aria-label="Dashboard"]\').getAttribute("aria-current") === "page";')
         click('[data-copy-domain="play.browser.test"]')
         wait_for('return document.querySelector("#domain-copy-feedback").textContent === "Copied play.browser.test";')
+        copied_at = time.monotonic()
+        wait_for('return document.querySelector("#domain-copy-feedback").textContent === "";')
+        assert time.monotonic() - copied_at < 2.8
         click('nav a[aria-label="App Settings"]')
         wait_for('return !document.querySelector("#two-factor-settings").classList.contains("hidden");')
         command('WebDriver:SetWindowRect', {'width': 320, 'height': 840})
@@ -178,9 +189,12 @@ with tempfile.TemporaryDirectory(prefix='proxycraft-browser-routes-') as tempora
         click('#logout')
         wait_for('return document.body.dataset.page === "public";')
         assert execute('return document.body.innerText.includes("Welcome, builders!") && !document.body.innerText.includes("play.browser.test") && document.querySelector(\'nav[aria-label="Main navigation"]\') === null && document.documentElement.scrollWidth <= innerWidth;')
-        for theme in ('light', 'dark', 'rainbow'):
-            click('[data-theme-choice="' + theme + '"]')
-            screenshot('welcome-' + theme + '-mobile')
+        for width, size in ((320, 'mobile'), (1440, 'desktop')):
+            command('WebDriver:SetWindowRect', {'width': width, 'height': 840})
+            for theme in ('light', 'dark', 'rainbow'):
+                click('[data-theme-choice="' + theme + '"]')
+                assert execute('const picker = document.querySelector(".theme-picker").getBoundingClientRect(); const button = document.querySelector(\'.header-actions a[href="/account/login"]\').getBoundingClientRect(); return Math.abs(button.height - picker.height) < 1 && Math.abs(button.top - picker.top) < 1;')
+                screenshot('welcome-' + theme + '-' + size)
         print('PASS: settings use two masonry-style columns on desktop and one on mobile; hidden cards take no space, expanded setup remains intact and focused at 1440/1024/768/320px, and all three themes fit.', flush=True)
         print('PASS: real browser signs in, saves public settings, enrolls an authenticator, displays eight recovery codes, signs in with 2FA, disables it with reauthentication, and logs out to the private-domain welcome page at 320px.', flush=True)
         print('Screenshots: ' + str(screenshots), flush=True)

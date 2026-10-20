@@ -115,7 +115,7 @@
 
     .header-actions {
         display: flex;
-        align-items: center;
+        align-items: stretch;
         flex-wrap: wrap;
         gap: 0.75rem;
     }

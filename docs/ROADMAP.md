@@ -18,7 +18,7 @@
 - [x] Start without login, then optionally set up a main account in App Settings and require sign-in.
 - [x] Hashed passwords, cookie sessions, CSRF protection, session validation, and login rate limiting.
 - [x] Optional authenticator-app 2FA with encrypted user fields, code replay prevention, recovery codes, and confirmed setup/removal.
-- [x] Opt-in anonymous welcome dashboard with an editable plain-text title and paragraph, dependent domain visibility, and click-to-copy names; management information remains protected.
+- [x] Opt-in anonymous welcome dashboard with an editable plain-text title and optional paragraph, dependent domain visibility, and click-to-copy names; management information remains protected.
 - [x] Admin Dashboard preview link and persistent navigation icons with evenly spaced mobile icon-only labels.
 - [x] Key-authenticated SignalR domain-add/remove events, including renames and revoked-key rejection, documented in the custom API reference.
 - [x] Human-readable contracts, explicit conditional blocks, consistent source formatting, and expanded Razor/styles without a UI redesign.
@@ -38,7 +38,7 @@
 - [x] Handle malformed clients, unknown domains, and unavailable backends explicitly.
 - [x] Per-row editing through the shared API; save immediately replaces only that route and resets its connections.
 - [x] Pen and trash icons on each row; deletion removes the saved route and closes only its connections.
-- [x] Click a domain to copy it, with accessible feedback.
+- [x] Click a domain to copy it, with accessible feedback that clears after two seconds.
 - [x] Save and display the latest 20 player login attempts per proxy, exclude status pings, and cascade history deletion with the proxy.
 - [x] Monitor/activity live-connections view with in-memory session tracking, independent same-name sessions, and cleanup on disconnect/reset/restart; preserve saved history.
 - [x] Numeric live connection counts in proxy table rows/mobile cards and the shared list API, refreshed without replacing row controls.

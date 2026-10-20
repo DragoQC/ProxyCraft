@@ -1,5 +1,6 @@
 const page = document.body.dataset.page;
 const csrf = document.querySelector('meta[name="csrf-token"]');
+const copyFeedbackTimers = new WeakMap();
 
 function showError(error, target = document.querySelector("#page-error")) {
     target.textContent = error.message || "The request could not be completed.";
@@ -65,7 +66,15 @@ async function copyDomain(domain, feedback) {
                 focused?.focus();
             }
         }
-        feedback.textContent = `Copied ${domain}`;
+        clearTimeout(copyFeedbackTimers.get(feedback));
+        const message = `Copied ${domain}`;
+        feedback.textContent = message;
+        copyFeedbackTimers.set(feedback, setTimeout(() => {
+            if (feedback.textContent === message) {
+                feedback.textContent = "";
+            }
+            copyFeedbackTimers.delete(feedback);
+        }, 2000));
     } catch (failure) {
         showError(failure);
     }

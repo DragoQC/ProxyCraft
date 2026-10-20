@@ -172,8 +172,19 @@ def verify():
             assert anonymous.request('/api/v1/public/dashboard')[1] == {'domains': [], 'message': 'Legacy welcome text', 'title': 'Welcome to ProxyCraft'}
             for path in ('/api/v1/proxies', '/api/v1/settings/app', '/api/v1/system/metrics', f'/api/v1/proxies/{route["id"]}/events'):
                 assert anonymous.request(path)[0] == 401, path
-            for message in ('', '   ', 'x' * 501):
-                assert admin.request('/api/v1/settings/app', 'PUT', {'publicDashboardEnabled': True, 'showPublicDomains': True, 'publicDashboardMessage': message})[0] == 400
+            for message in ('', '   '):
+                status, saved, _ = admin.request('/api/v1/settings/app', 'PUT', {'publicDashboardEnabled': True, 'publicDashboardMessage': message})
+                assert status == 200 and saved['publicDashboardMessage'] == ''
+                assert anonymous.request('/api/v1/public/dashboard')[1]['message'] == ''
+                assert '<p class="page-description' not in anonymous.request('/')[1]
+            saved = admin.request('/api/v1/settings/app', 'PUT', {'publicDashboardEnabled': True, 'publicDashboardMessage': None})[1]
+            assert saved['publicDashboardMessage'] == ''
+            stop()
+            start()
+            assert admin.request('/api/v1/settings/app')[1]['publicDashboardMessage'] == ''
+            assert '<p class="page-description' not in anonymous.request('/')[1]
+            assert admin.request('/api/v1/settings/app', 'PUT', {'publicDashboardEnabled': True, 'publicDashboardMessage': 'x' * 501})[0] == 400
+            assert admin.request('/api/v1/settings/app', 'PUT', {'publicDashboardEnabled': True, 'publicDashboardMessage': 'Legacy welcome text'})[0] == 200
             for title in ('', '   ', 'x' * 121):
                 assert admin.request('/api/v1/settings/app', 'PUT', {'publicDashboardEnabled': True, 'showPublicDomains': True, 'publicDashboardTitle': title})[0] == 400
             title = '<b>Builders gate</b>'

@@ -16,7 +16,7 @@ public sealed class UpdateAppSettingsRequest
 
     public bool ShowPublicDomains { get; set; }
 
-    [StringLength(500, MinimumLength = 1)]
+    [StringLength(500)]
     public string? PublicDashboardMessage { get; set; }
 
     [StringLength(120, MinimumLength = 1)]

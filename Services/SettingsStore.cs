@@ -40,11 +40,6 @@ public sealed class SettingsStore(
 
     public Task<ApplicationSettings> UpdatePublicDashboardAsync(UpdateAppSettingsRequest request, CancellationToken cancellationToken = default)
     {
-        if (request.PublicDashboardMessage is not null && string.IsNullOrWhiteSpace(request.PublicDashboardMessage))
-        {
-            throw new ArgumentException("Enter a welcome message.");
-        }
-
         if (request.PublicDashboardTitle is not null && string.IsNullOrWhiteSpace(request.PublicDashboardTitle))
         {
             throw new ArgumentException("Enter a welcome title.");
