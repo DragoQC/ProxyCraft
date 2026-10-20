@@ -1,0 +1,8 @@
+@{
+    ViewData["Title"] = "Error";
+    ViewData["Page"] = "error";
+    int statusCode = ViewData["StatusCode"] is int code ? code : 500;
+}
+<h1 class="page-title">@(statusCode == 404 ? "Page not found" : "Unable to complete this request")</h1>
+<p class="page-description">@(statusCode == 404 ? "This page does not exist." : "Please try again.")</p>
+<a href="/" class="mt-6 inline-block text-sm font-medium text-accent underline underline-offset-4">Back to home</a>

@@ -1,0 +1,112 @@
+@{
+    ViewData["Title"] = "App Settings";
+    ViewData["Page"] = "app-settings";
+}
+<h1 class="page-title">App Settings</h1>
+<p class="page-description">Control access to your dashboard and management API.</p>
+<div id="app-settings-cards" class="mt-8 columns-1 gap-6 lg:columns-2">
+    <section class="card mb-6 break-inside-avoid p-6" aria-labelledby="public-heading">
+        <h2 id="public-heading" class="font-semibold">Public dashboard</h2>
+        <p class="mt-2 text-sm text-muted">When sign-in is required, visitors can see a simple welcome page. Management controls and server details stay private.</p>
+        <form id="public-dashboard-settings" method="post" asp-antiforgery="false" class="mt-5 space-y-4">
+            <label class="flex items-center gap-3 text-sm text-body">
+                <input id="publicDashboardEnabled" name="publicDashboardEnabled" type="checkbox" class="size-4" />
+                Allow the welcome dashboard without signing in
+            </label>
+            <label class="flex items-center gap-3 text-sm text-body">
+                <input id="showPublicDomains" name="showPublicDomains" type="checkbox" class="size-4" />
+                Show domain names on the public dashboard
+            </label>
+            <button type="submit" class="button-primary" disabled>Save public settings</button>
+            <p id="public-settings-status" role="status" class="text-sm text-accent">
+            </p>
+        </form>
+    </section>
+    <section class="card mb-6 break-inside-avoid p-6" aria-labelledby="auth-heading">
+        <h2 id="auth-heading" class="font-semibold">Authentication</h2>
+        <p id="authentication-status" class="mt-2 text-sm text-secondary" role="status">Loading authentication settings…</p>
+        <div id="auth-disabled" class="mt-5 hidden">
+            <p class="mb-5 text-sm leading-6 text-muted">The app currently works without signing in. Enable authentication to require your main account for the dashboard and API.</p>
+            <button id="show-auth-setup" type="button" class="button-primary">Enable authentication</button>
+            <form id="auth-setup" method="post" asp-antiforgery="false" class="hidden space-y-5">
+                <div>
+                    <label for="usernameOrEmail" class="field-label">Username or email</label>
+                    <input id="usernameOrEmail" name="usernameOrEmail" class="field" autocomplete="username" minlength="3" maxlength="254" required />
+                    <p class="mt-2 text-xs text-muted">Choose one username or one email address for your main account.</p>
+                </div>
+                <div>
+                    <label for="password" class="field-label">Password</label>
+                    <input id="password" name="password" type="password" class="field" autocomplete="new-password" minlength="12" maxlength="128" required />
+                    <p class="mt-2 text-xs text-muted">Use at least 12 characters.</p>
+                </div>
+                <p class="text-sm text-muted">After saving, you will be asked to sign in with these credentials.</p>
+                <button type="submit" class="button-primary" disabled>Save and require sign-in</button>
+            </form>
+        </div>
+        <div id="auth-enabled" class="mt-5 hidden">
+            <p class="mb-5 text-sm text-muted">Signing in is required for the dashboard and management API.</p>
+            <button id="disable-auth" type="button" class="button-secondary">Disable authentication</button>
+        </div>
+    </section>
+    <section id="two-factor-settings" class="card mb-6 hidden break-inside-avoid p-6" aria-labelledby="two-factor-heading">
+        <h2 id="two-factor-heading" class="font-semibold">Two-factor authentication</h2>
+        <p id="two-factor-status" role="status" class="mt-2 text-sm text-secondary">
+        </p>
+        <p class="mt-3 text-sm text-muted">Use an authenticator app for six-digit codes. Keep your recovery codes somewhere safe.</p>
+        <form id="two-factor-start" method="post" asp-antiforgery="false" class="mt-5 space-y-4">
+            <div>
+                <label for="two-factor-password" class="field-label">Current password</label>
+                <input id="two-factor-password" name="password" type="password" class="field" autocomplete="current-password" minlength="12" maxlength="128" required />
+            </div>
+            <button type="submit" class="button-primary" disabled>Set up authenticator</button>
+        </form>
+        <form id="two-factor-confirm" method="post" asp-antiforgery="false" class="mt-5 hidden space-y-4">
+            <p class="text-sm text-muted">Add an account manually in your authenticator: choose a time-based key, name it ProxyCraft, and enter this secret. Setup expires after ten minutes.</p>
+            <div>
+                <label for="authenticator-secret" class="field-label">Authenticator secret</label>
+                <input id="authenticator-secret" class="field font-mono" readonly autocomplete="off" spellcheck="false" />
+            </div>
+            <a id="authenticator-link" class="text-sm text-accent underline">Open in an authenticator app</a>
+            <input id="two-factor-token" name="setupToken" type="hidden" />
+            <div>
+                <label for="authenticator-code" class="field-label">Six-digit code</label>
+                <input id="authenticator-code" name="code" class="field font-mono" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required />
+            </div>
+            <button type="submit" class="button-primary" disabled>Confirm and enable 2FA</button>
+        </form>
+        <form id="two-factor-disable" method="post" asp-antiforgery="false" class="mt-5 hidden space-y-4">
+            <div>
+                <label for="factor-disable-password" class="field-label">Current password</label>
+                <input id="factor-disable-password" name="password" type="password" class="field" autocomplete="current-password" minlength="12" maxlength="128" required />
+            </div>
+            <div>
+                <label for="factor-disable-code" class="field-label">Authenticator or recovery code</label>
+                <input id="factor-disable-code" name="code" class="field font-mono" autocomplete="one-time-code" maxlength="32" required />
+            </div>
+            <button type="submit" class="button-secondary" disabled>Disable 2FA and sign out</button>
+        </form>
+        <div id="recovery-codes" class="mt-5 hidden">
+            <h3 class="font-medium">Save these recovery codes now</h3>
+            <p class="mt-2 text-sm text-muted">Each code works once, together with your password. These codes will not be shown again. Existing sessions have been signed out. Use your next authenticator code or one recovery code to sign in.</p>
+            <pre id="recovery-code-list" tabindex="0" class="mt-4 overflow-x-auto rounded-lg border p-4 text-sm"></pre>
+            <a href="/account/login" class="button-primary mt-4">I saved my codes. Sign in</a>
+        </div>
+    </section>
+    <section class="card mb-6 break-inside-avoid p-6" aria-labelledby="api-heading">
+        <h2 id="api-heading" class="font-semibold">API access</h2>
+        <p id="api-key-status" role="status" class="mt-2 text-sm text-secondary">Loading API settings…</p>
+        <p class="mt-3 text-sm leading-6 text-muted">Once a key is configured, external requests must send it in the X-API-Key header. The dashboard uses its session and CSRF protection. An API key grants full management access.</p>
+        <p class="mt-2 text-sm text-muted">If sign-in is disabled, the dashboard is still open to anyone who can reach it.</p>
+        <form id="api-key-generate" method="post" asp-antiforgery="false" class="mt-5 space-y-3">
+            <button id="generate-api-key" type="submit" class="button-primary" disabled>Generate API key</button>
+            <p class="text-xs text-muted">Regenerating immediately invalidates the previous key.</p>
+        </form>
+        <div id="api-key-generated" class="mt-5 hidden">
+            <label for="generated-api-key" class="field-label">Your new API key</label>
+            <input id="generated-api-key" class="field font-mono text-xs" type="text" readonly autocomplete="off" spellcheck="false" />
+            <p class="mt-2 text-sm text-muted">Copy this key now. It is shown only once and cannot be retrieved later.</p>
+        </div>
+        <a href="/settings/api" class="button-secondary mt-5">Open API reference</a>
+        <p class="mt-3 text-sm text-muted">For instant domain additions and removals, connect to the SignalR hub described in the <a href="/settings/api#domain-events" class="text-accent underline">domain events reference</a>.</p>
+    </section>
+</div>

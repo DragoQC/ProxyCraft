@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-labelledby="title">
+    <title id="title">ProxyCraft: one connection, two routes</title>
+    <defs>
+        <linearGradient id="flow" x1="12" y1="8" x2="50" y2="56" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#64b548" />
+            <stop offset="1" stop-color="#14845f" />
+        </linearGradient>
+    </defs>
+    <path stroke="url(#flow)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" d="M8 32h17m0 0 25-22M25 32l25 22M38 10h12v12M38 54h12V42" />
+</svg>

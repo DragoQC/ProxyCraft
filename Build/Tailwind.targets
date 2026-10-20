@@ -1,0 +1,57 @@
+<Project>
+  <PropertyGroup>
+    <TailwindVersion>4.3.3</TailwindVersion>
+    <TailwindToolDirectory>$(MSBuildProjectDirectory)/.tools/tailwindcss/$(TailwindVersion)</TailwindToolDirectory>
+    <DefaultItemExcludes>$(DefaultItemExcludes);$(MSBuildProjectDirectory)/.tools/**</DefaultItemExcludes>
+  </PropertyGroup>
+
+  <!-- Official release asset names and SHA-256 digests for the SDK host, not the app's publish target. -->
+  <PropertyGroup Condition="'$(NETCoreSdkRuntimeIdentifier)' == 'linux-x64'">
+    <TailwindAsset>tailwindcss-linux-x64</TailwindAsset>
+    <TailwindSha256>dc61b3ac6b8c9ca874c0cc4c57b2409791a64c5540404ca5f5367360babc313a</TailwindSha256>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(NETCoreSdkRuntimeIdentifier)' == 'linux-arm64'">
+    <TailwindAsset>tailwindcss-linux-arm64</TailwindAsset>
+    <TailwindSha256>55fd0b241214eff3de1e8ee4f22796662f2d2e7a49bcfca7477cfd0bac398195</TailwindSha256>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(NETCoreSdkRuntimeIdentifier)' == 'linux-musl-x64'">
+    <TailwindAsset>tailwindcss-linux-x64-musl</TailwindAsset>
+    <TailwindSha256>a04d34ceacc8f52cbe8920ad846cdeb61d3d0021dba32db0d1f77c9d9fad7a6c</TailwindSha256>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(NETCoreSdkRuntimeIdentifier)' == 'linux-musl-arm64'">
+    <TailwindAsset>tailwindcss-linux-arm64-musl</TailwindAsset>
+    <TailwindSha256>71ea4be79c9de9827545682df3e040053fb535d37c71ed2cfdedf9385a0868e0</TailwindSha256>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(NETCoreSdkRuntimeIdentifier)' == 'osx-x64'">
+    <TailwindAsset>tailwindcss-macos-x64</TailwindAsset>
+    <TailwindSha256>7922e0953f2110c05976e3bf58f14e643d90427575e766b7d433f5f80cbee7e1</TailwindSha256>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(NETCoreSdkRuntimeIdentifier)' == 'osx-arm64'">
+    <TailwindAsset>tailwindcss-macos-arm64</TailwindAsset>
+    <TailwindSha256>cdf646702987a743464dff4d9c60fd4480d1c1e73dd819a9a67f1078815dce9d</TailwindSha256>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(NETCoreSdkRuntimeIdentifier)' == 'win-x64'">
+    <TailwindAsset>tailwindcss-windows-x64.exe</TailwindAsset>
+    <TailwindSha256>e0e260ce048014e9268f6237ff18f8ccf02cef521cbd0ae04e82c2cdf7aa3955</TailwindSha256>
+  </PropertyGroup>
+
+  <!-- Explicit, one-shot compilation. Ordinary build/run uses the included CSS without downloading tools. -->
+  <Target Name="BuildCss">
+    <Error Condition="'$(TailwindAsset)' == ''"
+           Text="No Tailwind $(TailwindVersion) standalone compiler is configured for SDK host $(NETCoreSdkRuntimeIdentifier). The included wwwroot/app.css still supports normal dotnet build/run." />
+    <PropertyGroup>
+      <TailwindExecutable>$(TailwindToolDirectory)/$(TailwindAsset)</TailwindExecutable>
+    </PropertyGroup>
+    <DownloadFile Condition="!Exists('$(TailwindExecutable)')"
+                  SourceUrl="https://github.com/tailwindlabs/tailwindcss/releases/download/v$(TailwindVersion)/$(TailwindAsset)"
+                  DestinationFolder="$(TailwindToolDirectory)" DestinationFileName="$(TailwindAsset)" Retries="1" />
+    <GetFileHash Files="$(TailwindExecutable)" Algorithm="SHA256">
+      <Output TaskParameter="Hash" PropertyName="TailwindActualSha256" />
+    </GetFileHash>
+    <Error Condition="'$(TailwindActualSha256)' != '$(TailwindSha256)'"
+           Text="Tailwind compiler checksum mismatch. Remove $(TailwindExecutable) and run BuildCss again to download the official compiler." />
+    <Exec Condition="'$(OS)' != 'Windows_NT'" Command="chmod +x &quot;$(TailwindExecutable)&quot;" />
+    <Exec WorkingDirectory="$(MSBuildProjectDirectory)"
+          Command="&quot;$(TailwindExecutable)&quot; -i &quot;$(MSBuildProjectDirectory)/Styles/app.css&quot; -o &quot;$(MSBuildProjectDirectory)/wwwroot/app.css&quot; --minify" />
+  </Target>
+</Project>

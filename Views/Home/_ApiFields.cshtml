@@ -1,0 +1,24 @@
+@using ProxyCraft.Api.Documentation
+@model IReadOnlyList<ApiFieldReference>
+<div class="card overflow-x-auto">
+    <table class="w-full min-w-[28rem] text-left text-xs">
+        <caption class="sr-only">Field names, types, and rules</caption>
+        <thead class="table-heading text-muted">
+            <tr>
+                <th scope="col" class="px-3 py-3 font-medium">Field</th>
+                <th scope="col" class="px-3 py-3 font-medium">Type</th>
+                <th scope="col" class="px-3 py-3 font-medium">Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (ApiFieldReference field in Model)
+            {
+                <tr class="table-row">
+                    <th scope="row" class="px-3 py-3 align-top font-mono font-medium">@field.Name</th>
+                    <td class="px-3 py-3 align-top text-secondary">@field.Type</td>
+                    <td class="min-w-40 px-3 py-3 align-top leading-5 text-secondary">@field.Details</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

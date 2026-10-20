@@ -1,0 +1,19 @@
+@model ProxyCraft.Api.Contracts.PublicDashboardResponse
+@{
+    ViewData["Title"] = "Welcome";
+    ViewData["Page"] = "public";
+}
+<section class="card mx-auto max-w-2xl p-6 sm:p-8">
+    <h1 class="page-title">Welcome to ProxyCraft</h1>
+    <p class="page-description">The Minecraft proxy that just works.</p>
+    @if (Model.Domains.Count > 0)
+    {
+        <h2 class="mt-8 font-semibold">Minecraft domains</h2>
+        <ul class="mt-3 space-y-3">
+            @foreach (string domain in Model.Domains)
+            {
+                <li class="[overflow-wrap:anywhere] text-sm text-accent">@domain</li>
+            }
+        </ul>
+    }
+</section>

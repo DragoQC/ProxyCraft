@@ -1,0 +1,496 @@
+@import "tailwindcss" source(none);
+@source "../Views";
+@source "../wwwroot/js";
+@theme inline {
+    --color-primary: var(--ink);
+    --color-body: var(--ink-body);
+    --color-secondary: var(--ink-secondary);
+    --color-muted: var(--ink-muted);
+    --color-accent: var(--accent);
+    --color-danger: var(--danger);
+}
+
+@layer base {
+    :root {
+        color-scheme: light;
+        --page: var(--color-slate-50);
+        --surface: #fff;
+        --surface-raised: var(--color-slate-50);
+        --surface-hover: var(--color-slate-100);
+        --border: var(--color-slate-200);
+        --border-strong: var(--color-slate-300);
+        --border-soft: var(--color-slate-100);
+        --ink: var(--color-slate-900);
+        --ink-body: var(--color-slate-700);
+        --ink-secondary: var(--color-slate-600);
+        --ink-muted: var(--color-slate-500);
+        --placeholder: var(--color-slate-400);
+        --accent: var(--color-emerald-700);
+        --accent-hover: var(--color-emerald-800);
+        --button-ink: #fff;
+        --danger: var(--color-red-700);
+        --danger-surface: var(--color-red-50);
+        --danger-border: var(--color-red-200);
+    }
+
+    :root[data-theme="dark"] {
+        color-scheme: dark;
+        --page: #0c0f14;
+        --surface: #141a22;
+        --surface-raised: #10161f;
+        --surface-hover: #1c2633;
+        --border: #2b3645;
+        --border-strong: #45556b;
+        --border-soft: #232e3c;
+        --ink: #f1f5f9;
+        --ink-body: #d4deeb;
+        --ink-secondary: #b5c2d4;
+        --ink-muted: #98a8bd;
+        --placeholder: #8798af;
+        --accent: #34d399;
+        --accent-hover: #6ee7b7;
+        --button-ink: #03271e;
+        --danger: #fca5a5;
+        --danger-surface: #2a141c;
+        --danger-border: #75414d;
+    }
+
+    :root[data-theme="rainbow"] {
+        color-scheme: dark;
+        --page: #070411;
+        --surface: #100d23;
+        --surface-raised: #15102c;
+        --surface-hover: #261c44;
+        --border: #49356d;
+        --border-strong: #786194;
+        --border-soft: #33234e;
+        --ink: #f7f4ff;
+        --ink-body: #e3d9f5;
+        --ink-secondary: #cfc4e7;
+        --ink-muted: #b3a4cf;
+        --placeholder: #a594c3;
+        --accent: #67e8f9;
+        --accent-hover: #a5f3fc;
+        --button-ink: #fff;
+        --danger: #fda4bf;
+        --danger-surface: #310e28;
+        --danger-border: #8b3665;
+    }
+
+    html {
+        background: var(--page);
+    }
+
+    h1:focus {
+        outline: none;
+    }
+
+    :where(a, button, input):focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 3px;
+    }
+
+    ::selection {
+        background: var(--accent);
+        color: var(--page);
+    }
+}
+
+@layer components {
+    .app-shell {
+        isolation: isolate;
+        background: var(--page);
+        color: var(--ink);
+    }
+
+    .app-header {
+        position: relative;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface);
+    }
+
+    .app-logo {
+        display: block;
+    }
+
+    .header-actions {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .skip-link {
+        background: var(--surface);
+        color: var(--ink);
+    }
+
+    .card {
+        @apply rounded-xl border;
+        border-color: var(--border);
+        background: var(--surface);
+    }
+
+    .resource-meter {
+        width: 100%;
+        height: 0.5rem;
+        border: 0;
+        border-radius: 9999px;
+        background: var(--surface-hover);
+    }
+
+    .resource-meter::-webkit-meter-bar {
+        border: 0;
+        border-radius: 9999px;
+        background: var(--surface-hover);
+    }
+
+    .resource-meter::-webkit-meter-optimum-value {
+        border-radius: 9999px;
+        background: var(--accent);
+    }
+
+    .resource-meter::-moz-meter-bar {
+        border-radius: 9999px;
+        background: var(--accent);
+    }
+
+    .page-title {
+        @apply text-2xl font-semibold tracking-tight;
+    }
+
+    .page-description {
+        @apply mt-2 text-sm leading-6;
+        color: var(--ink-secondary);
+    }
+
+    .field-label {
+        @apply mb-2 block text-sm font-medium;
+        color: var(--ink-body);
+    }
+
+    .field {
+        @apply block w-full rounded-md border px-3 py-2 text-sm;
+        border-color: var(--border-strong);
+        background: var(--surface);
+        color: var(--ink);
+    }
+
+    .field::placeholder {
+        color: var(--placeholder);
+    }
+
+    .field:focus {
+        border-color: var(--accent);
+        outline: 2px solid var(--accent);
+        outline-offset: 0;
+    }
+
+    .button-primary, .button-secondary {
+        @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium disabled:cursor-wait disabled:opacity-60;
+    }
+
+    .button-primary {
+        background: var(--accent);
+        color: var(--button-ink);
+    }
+
+    .button-primary:hover {
+        background: var(--accent-hover);
+    }
+
+    .button-secondary {
+        border: 1px solid var(--border-strong);
+        background: var(--surface);
+        color: var(--ink-body);
+    }
+
+    .button-secondary:hover {
+        background: var(--surface-hover);
+    }
+
+    .nav-link {
+        @apply rounded-md px-3 py-2 text-sm font-medium;
+        color: var(--ink-secondary);
+    }
+
+    .nav-link:hover, .nav-link.is-active {
+        background: var(--surface-hover);
+    }
+
+    .nav-link.is-active {
+        color: var(--ink);
+    }
+
+    .table-heading {
+        border-bottom: 1px solid var(--border);
+        background: var(--surface-raised);
+    }
+
+    .table-row, .proxy-row, .connection-entry {
+        border-bottom: 1px solid var(--border-soft);
+    }
+
+    .table-row:last-child, .proxy-row:last-child, .connection-entry:last-child {
+        border-bottom: 0;
+    }
+
+    .notice-error {
+        border-color: var(--danger-border);
+        background: var(--danger-surface);
+        color: var(--danger);
+    }
+
+    .app-dialog {
+        border: 1px solid var(--border);
+        background: var(--surface);
+    }
+
+    .connection-dialog[open] {
+        display: flex;
+        flex-direction: column;
+    }
+
+    #connection-events {
+        scrollbar-gutter: stable;
+        scrollbar-width: thin;
+        scrollbar-color: var(--ink-muted) var(--surface);
+    }
+
+    dialog {
+        max-width: min(32rem, calc(100% - 2rem));
+    }
+
+    dialog::backdrop {
+        background: rgb(3 7 18 / 65%);
+    }
+
+    .theme-picker {
+        display: flex;
+        align-items: center;
+        gap: 0.2rem;
+        min-inline-size: 0;
+        padding: 0.25rem;
+        border: 1px solid var(--border);
+        border-radius: 0.65rem;
+        background: var(--surface-raised);
+    }
+
+    .theme-option {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        min-width: 2.75rem;
+        min-height: 2.75rem;
+        padding: 0.4rem 0.6rem;
+        border: 1px solid transparent;
+        border-radius: 0.4rem;
+        color: var(--ink-muted);
+        font-size: 0.75rem;
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+    .theme-option:hover {
+        background: var(--surface-hover);
+        color: var(--ink);
+    }
+
+    .theme-option[aria-pressed="true"] {
+        border-color: var(--border);
+        background: var(--surface);
+        color: var(--ink);
+        box-shadow: 0 1px 3px #0000000d;
+    }
+
+    .theme-option svg, .rainbow-swatch {
+        width: 0.9rem;
+        height: 0.9rem;
+        flex-shrink: 0;
+    }
+
+    .rainbow-swatch {
+        border-radius: 50%;
+        background: conic-gradient(#fb7185, #facc15, #4ade80, #22d3ee, #818cf8, #e879f9, #fb7185);
+    }
+
+    @media (width < 48rem) {
+        .proxy-table.card, :root[data-theme="rainbow"] .proxy-table.card {
+            border: 0;
+            background: transparent;
+            box-shadow: none;
+            animation: none;
+        }
+
+        .proxy-table table {
+            display: block;
+        }
+
+        .proxy-table thead {
+            display: none;
+        }
+
+        .proxy-table tbody {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .proxy-table .proxy-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 0.75rem 1rem;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            background: var(--surface);
+        }
+
+        .proxy-row > td {
+            display: block;
+            min-width: 0;
+            padding: 0;
+        }
+
+        .proxy-row .proxy-domain, .proxy-row .proxy-destination {
+            grid-column: 1 / -1;
+        }
+
+        .proxy-row .proxy-actions {
+            grid-column: 1 / -1;
+            border-top: 1px solid var(--border-soft);
+            padding-top: 0.75rem;
+        }
+
+        .proxy-table .proxy-empty {
+            display: block;
+        }
+    }
+
+    #rainbow-scene {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    #rainbow-particles {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .rainbow-aurora {
+        position: absolute;
+        inset: -25%;
+        background: radial-gradient(ellipse at 15% 25%, #7c3aed45, transparent 45%), radial-gradient(ellipse at 80% 20%, #db27773b, transparent 40%), radial-gradient(ellipse at 65% 85%, #0891b23d, transparent 45%);
+        filter: blur(45px);
+        animation: aurora-drift 24s ease-in-out infinite alternate paused;
+    }
+
+    .rainbow-grid {
+        position: absolute;
+        inset: 0;
+        background-image: linear-gradient(#a78bfa12 1px, transparent 1px), linear-gradient(90deg, #a78bfa12 1px, transparent 1px);
+        background-size: 56px 56px;
+        mask-image: linear-gradient(#0009, transparent 90%);
+    }
+
+    :root[data-theme="rainbow"] {
+        #rainbow-scene {
+            display: block;
+        }
+
+        .app-header {
+            background: #0b071cd9;
+            backdrop-filter: blur(16px);
+        }
+
+        .app-header::after {
+            content: "";
+            position: absolute;
+            bottom: -1px;
+            inset-inline: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #a78bfa, #f472b6, #fb923c, #bef264, #22d3ee, #a78bfa);
+            background-size: 250% 100%;
+            box-shadow: 0 0 20px #c084fc55;
+            animation: rainbow-flow 12s ease-in-out infinite alternate paused;
+        }
+
+        .card, .app-dialog {
+            border-color: transparent;
+            background: linear-gradient(var(--surface), var(--surface)) padding-box, linear-gradient(120deg, #a78bfa99, #f472b677, #22d3ee88, #a78bfa99) border-box;
+            background-size: 100% 100%, 250% 100%;
+            box-shadow: 0 8px 36px #05000b55, 0 0 24px #a855f712;
+            animation: rainbow-flow 14s ease-in-out infinite alternate paused;
+        }
+
+        .page-title {
+            width: fit-content;
+            background: linear-gradient(110deg, #c4b5fd, #f9a8d4, #67e8f9, #d9f99d, #c4b5fd);
+            background-size: 250% 100%;
+            background-clip: text;
+            color: transparent;
+            animation: rainbow-flow 12s ease-in-out infinite alternate paused;
+        }
+
+        .button-primary {
+            background: linear-gradient(110deg, #6d28d9, #4338ca, #0e7490, #9d174d, #6d28d9);
+            background-size: 300% 100%;
+            color: #fff;
+            box-shadow: 0 0 22px #a855f733, inset 0 0 0 1px #e9d5ff33;
+            animation: rainbow-flow 10s ease-in-out infinite alternate paused;
+        }
+
+        .button-primary:hover {
+            box-shadow: 0 0 30px #a855f766, inset 0 0 0 1px #f0abfc88;
+        }
+
+        .nav-link.is-active {
+            background: linear-gradient(110deg, #7c3aed33, #22d3ee15);
+            box-shadow: inset 0 -2px #c084fc;
+        }
+
+        .theme-option[data-theme-choice="rainbow"][aria-pressed="true"] {
+            background: linear-gradient(110deg, #6d28d955, #0891b233);
+            border-color: #a78bfa88;
+            box-shadow: 0 0 14px #a855f733;
+        }
+
+        .field:focus {
+            box-shadow: 0 0 20px #22d3ee1f;
+        }
+
+        dialog::backdrop {
+            background: #03000ad9;
+            backdrop-filter: blur(6px);
+        }
+    }
+
+    :root[data-theme="rainbow"][data-effects="on"] :is(.rainbow-aurora, .card, .app-dialog, .page-title, .button-primary), :root[data-theme="rainbow"][data-effects="on"] .app-header::after {
+        animation-play-state: running;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        :root[data-theme="rainbow"] :is(.rainbow-aurora, .card, .app-dialog, .page-title, .button-primary), :root[data-theme="rainbow"] .app-header::after {
+            animation: none;
+        }
+    }
+}
+
+@keyframes rainbow-flow {
+    to {
+        background-position: 250% 50%;
+    }
+}
+
+@keyframes aurora-drift {
+    to {
+        transform: translate3d(5%, -4%, 0) rotate(9deg) scale(1.08);
+    }
+}

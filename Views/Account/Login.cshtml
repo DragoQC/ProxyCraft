@@ -1,0 +1,24 @@
+@{
+    ViewData["Title"] = "Sign in";
+    ViewData["Page"] = "login";
+}
+<section class="card mx-auto max-w-md p-6 sm:p-8">
+    <h1 class="page-title">Sign in</h1>
+    <p class="page-description">Use your main ProxyCraft account.</p>
+    <form id="login" method="post" asp-antiforgery="false" class="mt-8 space-y-5">
+        <div>
+            <label for="usernameOrEmail" class="field-label">Username or email</label>
+            <input id="usernameOrEmail" name="usernameOrEmail" class="field" autocomplete="username" maxlength="254" required autofocus />
+        </div>
+        <div>
+            <label for="password" class="field-label">Password</label>
+            <input id="password" name="password" type="password" class="field" autocomplete="current-password" maxlength="128" required />
+        </div>
+        <div>
+            <label for="twoFactorCode" class="field-label">Authenticator or recovery code</label>
+            <input id="twoFactorCode" name="twoFactorCode" class="field font-mono" autocomplete="one-time-code" maxlength="32" />
+            <p class="mt-2 text-xs text-muted">Required only when two-factor authentication is enabled.</p>
+        </div>
+        <button type="submit" class="button-primary w-full" disabled>Sign in</button>
+    </form>
+</section>

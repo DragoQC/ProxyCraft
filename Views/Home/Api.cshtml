@@ -1,0 +1,130 @@
+@using ProxyCraft.Api.Documentation
+@model IReadOnlyList<ApiEndpointReference>
+@{
+    ViewData["Title"] = "API reference";
+    ViewData["Page"] = "api-reference";
+}
+<h1 class="page-title">API reference</h1>
+<p class="page-description">Inputs, outputs, and examples for the ProxyCraft management API.</p>
+<a href="/settings/app" class="mt-3 inline-block text-sm text-accent underline underline-offset-4">Back to App Settings</a>
+
+<section aria-labelledby="api-access-title" class="card mt-6 space-y-4 p-5 sm:p-6">
+    <h2 id="api-access-title" class="text-lg font-semibold">Calling the API</h2>
+    <p class="text-sm leading-6 text-secondary">Base path: <code class="font-mono text-primary">/api/v1</code>. Requests and responses use JSON with camelCase fields. Send <code>Content-Type: application/json</code> when sending a body.</p>
+    <p class="text-sm leading-6 text-secondary">Generate your key in App Settings and send it in <code class="text-primary">X-API-Key</code> on every external API request. A valid key grants full management access without a dashboard login, cookies, or a CSRF token. Regenerating the key invalidates the old one.</p>
+    <pre class="card overflow-x-auto p-4 text-xs leading-6 text-secondary"><code>curl -H "X-API-Key: $PROXYCRAFT_API_KEY" https://your-dashboard/api/v1/proxies</code></pre>
+    <p class="text-sm leading-6 text-muted">The dashboard uses its session cookie and <code>X-CSRF-TOKEN</code> header. With sign-in off, the dashboard is public. Before an API key is configured, clients can use that same cookie/CSRF flow. Examples below contain illustrative values.</p>
+</section>
+
+<section id="domain-events" aria-labelledby="domain-events-title" class="card mt-6 space-y-4 p-5 sm:p-6">
+    <h2 id="domain-events-title" class="text-lg font-semibold">Live domain events</h2>
+    <p class="text-sm leading-6 text-secondary">Connect a SignalR client to <code>/api/v1/hubs/domains</code> with a valid <code>X-API-Key</code> header. Listen for <code>DomainAdded</code> and <code>DomainRemoved</code>. Each notification contains <code>proxyId</code>, <code>domain</code>, and UTC <code>occurredAt</code>.</p>
+    <p class="text-sm leading-6 text-muted">Notifications follow committed route changes. Renaming emits removal of the old domain, then addition of the new one. This live feed has no replay: refresh the configured proxy list after reconnecting. Rotated keys cannot receive subsequent events. Browser cookies alone cannot subscribe.</p>
+</section>
+
+<div class="mt-8 flex flex-wrap items-center justify-between gap-2">
+    <h2 class="text-lg font-semibold">Endpoints</h2>
+    <span class="text-sm text-muted">@Model.Count operations</span>
+</div>
+<div id="api-reference" class="mt-4 space-y-3">
+    @foreach (ApiEndpointReference endpoint in Model)
+    {
+        <details class="card group" data-api-method="@endpoint.Method" data-api-path="@endpoint.Path">
+            <summary class="flex cursor-pointer list-none items-start gap-3 p-5 sm:p-6">
+                <span class="mt-0.5 w-16 shrink-0 rounded-md border px-2 py-1 text-center font-mono text-xs font-semibold @(endpoint.Method == "DELETE" ? "text-danger" : "text-accent")">@endpoint.Method</span>
+                <span class="min-w-0 flex-1">
+                    <code class="block break-all font-mono text-sm font-medium">@endpoint.Path</code>
+                    <span class="mt-1 block text-sm text-secondary">@endpoint.Summary</span>
+                </span>
+                <svg aria-hidden="true" class="mt-1 size-4 shrink-0 text-muted transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+                    <path d="m6 9 6 6 6-6" />
+                </svg>
+            </summary>
+            <div class="space-y-6 px-5 pb-5 sm:px-6 sm:pb-6">
+                @if (endpoint.Notes is not null)
+                {
+                    <p class="text-sm leading-6 text-secondary">@endpoint.Notes</p>
+                }
+                @if (endpoint.Parameters.Count > 0)
+                {
+                    <section>
+                        <h3 class="mb-3 text-sm font-semibold">Path and query parameters</h3>
+                        <partial name="_ApiFields" model="endpoint.Parameters" />
+                    </section>
+                }
+                <div class="grid min-w-0 gap-6 lg:grid-cols-2">
+                    <section class="min-w-0 space-y-3">
+                        <h3 class="text-sm font-semibold">Request body</h3>
+                        @if (endpoint.RequestExample is null)
+                        {
+                            <p class="text-sm text-muted">No request body.</p>
+                        }
+                        else
+                        {
+                            <partial name="_ApiFields" model="endpoint.RequestFields" />
+                            <h4 class="text-xs font-medium text-secondary">Example JSON</h4>
+                            <pre class="card overflow-x-auto p-4 text-xs leading-6 text-secondary"><code>@endpoint.RequestExample</code></pre>
+                        }
+                    </section>
+                    <section class="min-w-0 space-y-4">
+                        <h3 class="text-sm font-semibold">Responses</h3>
+                        @foreach (ApiResponseReference response in endpoint.Responses)
+                        {
+                            <div class="space-y-3">
+                                <h4 class="text-sm font-medium">
+                                    <code class="@(response.StatusCode >= 400 ? "text-danger" : "text-accent")">@response.StatusCode</code> @response.Description</h4>
+                                @if (response.StatusCode >= 400)
+                                {
+                                    <p class="text-xs text-muted">See the common error format below.</p>
+                                }
+                                else if (response.Example is null)
+                                {
+                                    <p class="text-sm text-muted">No response body.</p>
+                                }
+                                else
+                                {
+                                    <p class="text-xs text-muted">@(response.IsCollection ? "JSON array. Fields below describe each item." : "JSON object.")</p>
+                                    <partial name="_ApiFields" model="response.Fields" />
+                                    <h5 class="text-xs font-medium text-secondary">Example JSON</h5>
+                                    <pre class="card overflow-x-auto p-4 text-xs leading-6 text-secondary"><code>@response.Example</code></pre>
+                                }
+                            </div>
+                        }
+                    </section>
+                </div>
+            </div>
+        </details>
+    }
+</div>
+
+<section aria-labelledby="api-errors-title" class="card mt-8 space-y-4 p-5 sm:p-6">
+    <h2 id="api-errors-title" class="text-lg font-semibold">Errors and authorization</h2>
+    <p class="text-sm leading-6 text-secondary">Management endpoints follow the app's authentication and API-key rules. Invalid supplied keys return 401. Browser changes require a valid CSRF token even when sign-in is off. The optional public dashboard exposes only permitted domain names without a key; two-factor setup requires a signed-in account, and the event hub requires an API key.</p>
+    <dl class="grid gap-3 text-sm sm:grid-cols-2">
+        <div>
+            <dt class="font-mono font-medium">400 Bad Request</dt>
+            <dd class="mt-1 text-secondary">Invalid fields or a missing browser CSRF token.</dd>
+        </div>
+        <div>
+            <dt class="font-mono font-medium">401 Unauthorized</dt>
+            <dd class="mt-1 text-secondary">Missing or invalid authentication/API key.</dd>
+        </div>
+        <div>
+            <dt class="font-mono font-medium">404 Not Found</dt>
+            <dd class="mt-1 text-secondary">The requested proxy does not exist.</dd>
+        </div>
+        <div>
+            <dt class="font-mono font-medium">409 Conflict</dt>
+            <dd class="mt-1 text-secondary">Duplicate domain/destination, or sign-in is already enabled.</dd>
+        </div>
+        <div>
+            <dt class="font-mono font-medium">429 Too Many Requests</dt>
+            <dd class="mt-1 text-secondary">Login rate limit reached. Try again later.</dd>
+        </div>
+    </dl>
+    <p class="text-sm text-secondary">Application errors use ProblemDetails. Field validation can add an <code>errors</code> object. Framework CSRF and rate-limit responses may have an empty body.</p>
+    <pre class="card overflow-x-auto p-4 text-xs leading-6 text-secondary"><code>{
+  "title": "A proxy for this domain already exists.",
+  "status": 409
+}</code></pre>
+</section>

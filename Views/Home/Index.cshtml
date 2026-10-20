@@ -1,0 +1,54 @@
+@{
+    ViewData["Title"] = "Home";
+    ViewData["Page"] = "home";
+}
+<h1 class="page-title">Proxy overview</h1>
+<p class="page-description">Route Minecraft connections to the right server by domain name.</p>
+<dl class="mt-8 grid gap-4 sm:grid-cols-2">
+    <div class="card p-6">
+        <dt class="text-sm text-muted">Configured listener port</dt>
+        <dd id="listen-port" class="mt-3 font-mono text-xl font-semibold" aria-live="polite">Loading…</dd>
+        <dd class="mt-2 text-sm text-muted">Default: 25565</dd>
+    </div>
+    <div class="card p-6">
+        <dt class="text-sm text-muted">Configured proxies</dt>
+        <dd id="proxy-count" class="mt-3 text-xl font-semibold" aria-live="polite">Loading…</dd>
+        <dd class="mt-2">
+            <a class="text-sm font-medium text-accent underline underline-offset-4" href="/proxies">Manage proxies</a>
+        </dd>
+    </div>
+</dl>
+<section aria-labelledby="system-resources-title" class="mt-8">
+    <h2 id="system-resources-title" class="text-lg font-semibold">System resources</h2>
+    <p class="mt-2 text-sm text-muted">Resources available to this LXC or VM. Disk covers the filesystem containing ProxyCraft's data.</p>
+    <dl class="mt-4 grid gap-4 md:grid-cols-3">
+        <div class="card p-6">
+            <dt class="text-sm text-muted">CPU</dt>
+            <dd id="cpu-usage" class="mt-3 text-2xl font-semibold">Loading…</dd>
+            <dd id="cpu-total" class="mt-2 text-sm text-secondary">Loading capacity…</dd>
+            <dd class="mt-4">
+                <meter id="cpu-meter" class="resource-meter hidden" min="0" max="100" value="0" aria-label="CPU usage">
+                </meter>
+            </dd>
+        </div>
+        <div class="card p-6">
+            <dt class="text-sm text-muted">RAM</dt>
+            <dd id="memory-usage" class="mt-3 text-2xl font-semibold">Loading…</dd>
+            <dd id="memory-total" class="mt-2 text-sm text-secondary">Loading capacity…</dd>
+            <dd class="mt-4">
+                <meter id="memory-meter" class="resource-meter hidden" min="0" max="100" value="0" aria-label="RAM usage">
+                </meter>
+            </dd>
+        </div>
+        <div class="card p-6">
+            <dt class="text-sm text-muted">Disk</dt>
+            <dd id="disk-usage" class="mt-3 text-2xl font-semibold">Loading…</dd>
+            <dd id="disk-total" class="mt-2 text-sm text-secondary">Loading capacity…</dd>
+            <dd class="mt-4">
+                <meter id="disk-meter" class="resource-meter hidden" min="0" max="100" value="0" aria-label="Disk usage">
+                </meter>
+            </dd>
+        </div>
+    </dl>
+    <p id="system-metrics-status" role="status" class="mt-3 text-xs text-muted">Usage refreshes every 5 seconds.</p>
+</section>

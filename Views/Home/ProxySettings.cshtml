@@ -1,0 +1,18 @@
+@{
+    ViewData["Title"] = "Proxy Settings";
+    ViewData["Page"] = "proxy-settings";
+}
+<h1 class="page-title">Proxy Settings</h1>
+<p class="page-description">Settings shared by your Minecraft proxy routes.</p>
+<section class="card mt-8 max-w-xl p-6">
+    <form id="proxy-settings" method="post" asp-antiforgery="false" class="space-y-5">
+        <div>
+            <label for="listenPort" class="field-label">Minecraft listener port</label>
+            <input id="listenPort" name="listenPort" type="number" class="field" min="1" max="65535" required value="25565" />
+            <p class="mt-2 text-sm text-muted">Defaults to 25565. The dashboard uses its own web port.</p>
+        </div>
+        <button type="submit" class="button-primary" disabled>Save settings</button>
+        <p id="settings-saved" role="status" class="hidden text-sm text-accent">Settings saved.</p>
+    </form>
+</section>
+<p class="mt-4 text-sm text-muted">Changing this port updates the shared listener. Individual domain and destination edits belong on Configured proxies.</p>

@@ -1,0 +1,87 @@
+@inject IAntiforgery Antiforgery
+@{
+    AntiforgeryTokenSet csrf = Antiforgery.GetAndStoreTokens(Context);
+    string? actionName = ViewContext.RouteData.Values["action"] as string;
+    bool isLogin = ViewData["Page"] as string == "login";
+    bool isPublic = ViewData["Page"] as string == "public";
+}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="@csrf.RequestToken" />
+    <title>@ViewData["Title"] · ProxyCraft</title>
+    <link rel="icon" type="image/svg+xml" sizes="any" href="~/logo.svg" asp-append-version="true" />
+    <script src="~/js/theme.js" asp-append-version="true">
+    </script>
+    <link rel="stylesheet" href="~/app.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+    <script type="module" src="~/js/app.js" asp-append-version="true">
+    </script>
+</head>
+<body data-page="@ViewData["Page"]" class="app-shell min-h-screen font-sans antialiased">
+    <div id="rainbow-scene" aria-hidden="true">
+        <div class="rainbow-aurora">
+        </div>
+        <div class="rainbow-grid">
+        </div>
+        <canvas id="rainbow-particles">
+        </canvas>
+    </div>
+    <a href="#main-content" class="skip-link sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:px-4 focus:py-2">Skip to content</a>
+    <header class="app-header">
+        <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-5 py-5 sm:px-8">
+            <a href="/" aria-label="ProxyCraft home" class="flex items-center gap-3 rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent">
+                <img src="~/logo.svg" asp-append-version="true" alt="" width="36" height="36" class="app-logo size-9 shrink-0" />
+                <span class="hidden sm:block">
+                    <span class="block font-semibold tracking-tight">ProxyCraft</span>
+                    <span class="text-muted block text-xs">Minecraft proxy</span>
+                </span>
+            </a>
+            <div class="header-actions">
+                <fieldset class="theme-picker" aria-label="Color theme">
+                    <legend class="sr-only">Color theme</legend>
+                    <button type="button" class="theme-option" data-theme-choice="light" aria-label="Light theme" title="Light theme" aria-pressed="true">
+                        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                            <circle cx="12" cy="12" r="4" />
+                            <path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5" />
+                        </svg>
+                        <span class="hidden sm:inline">Light</span>
+                    </button>
+                    <button type="button" class="theme-option" data-theme-choice="dark" aria-label="Dark theme" title="Dark theme" aria-pressed="false">
+                        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                            <path d="M20.5 14A8.7 8.7 0 0 1 10 3.5 8.8 8.8 0 1 0 20.5 14Z" />
+                        </svg>
+                        <span class="hidden sm:inline">Dark</span>
+                    </button>
+                    <button type="button" class="theme-option" data-theme-choice="rainbow" aria-label="Rainbow theme" title="Rainbow theme" aria-pressed="false">
+                        <span class="rainbow-swatch" aria-hidden="true">
+                        </span>
+                        <span class="hidden sm:inline">Rainbow</span>
+                    </button>
+                </fieldset>
+                <button id="logout" type="button" class="button-secondary hidden">Sign out</button>
+                @if (isPublic)
+                {
+                    <a href="/account/login" class="button-secondary">Sign in</a>
+                }
+            </div>
+        </div>
+        @if (!isLogin && !isPublic)
+        {
+            <nav aria-label="Main navigation" class="mx-auto flex max-w-6xl flex-wrap gap-1 px-5 pb-3 sm:px-8">
+                <a href="/" class="nav-link @(actionName == "Index" ? "is-active" : "")">Home</a>
+                <a href="/proxies" class="nav-link @(actionName == "Proxies" ? "is-active" : "")">Configured proxies</a>
+                <a href="/settings/proxy" class="nav-link @(actionName == "ProxySettings" ? "is-active" : "")">Proxy Settings</a>
+                <a href="/settings/app" class="nav-link @(actionName is "AppSettings" or "Api" ? "is-active" : "")">App Settings</a>
+            </nav>
+        }
+    </header>
+    <main id="main-content" tabindex="-1" class="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-12">
+        <div id="page-error" role="alert" class="notice-error mb-6 hidden rounded-lg border p-4 text-sm">
+        </div>
+        @RenderBody()
+    </main>
+</body>
+</html>
