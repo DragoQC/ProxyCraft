@@ -53,8 +53,6 @@ builder.Services.AddScoped<ConnectionEventService>();
 builder.Services.AddScoped<ApiKeyService>();
 builder.Services.AddSingleton<MinecraftProxyService>();
 builder.Services.AddHostedService((IServiceProvider services) => services.GetRequiredService<MinecraftProxyService>());
-builder.Services.AddSingleton<RconProxyService>();
-builder.Services.AddHostedService((IServiceProvider services) => services.GetRequiredService<RconProxyService>());
 builder.Services.AddSingleton<SystemMetricsService>();
 builder.Services.AddHostedService((IServiceProvider services) => services.GetRequiredService<SystemMetricsService>());
 builder.Services.AddScoped<SessionCookieEvents>();

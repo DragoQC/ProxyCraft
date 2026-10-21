@@ -46,8 +46,6 @@
 - [x] Cached TCP reachability checks and live status in the list/API, independent of stored enablement.
 - [x] Test actual parsing, forwarding, route isolation, backend health/recovery, listener changes, and cancellation.
 
-- [x] Optional per-route native RCON forwarding, unique public/backend ports, occupied-port rejection before save, isolated session resets, and discovery metadata for RconCraft.
-
 ## Later
 
 - [ ] Full Minecraft status responses (TCP reachability is implemented).

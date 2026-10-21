@@ -9,10 +9,4 @@ public sealed class Proxy : BaseModel
     public string DestinationHost { get; set; } = string.Empty;
 
     public int DestinationPort { get; set; } = 25565;
-
-    public bool RconEnabled { get; set; }
-
-    public int RconListenPort { get; set; } = 25575;
-
-    public int RconDestinationPort { get; set; } = 25575;
 }
