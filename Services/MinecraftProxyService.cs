@@ -291,7 +291,7 @@ public sealed class MinecraftProxyService(
                     // Ending either direction cancels and closes the remaining forwarding operation.
                 }
             }
-            catch (Exception exception) when (exception is IOException or SocketException or OperationCanceledException or ObjectDisposedException or DecoderFallbackException)
+            catch (Exception exception) when (exception is IOException or InvalidDataException or SocketException or OperationCanceledException or ObjectDisposedException or DecoderFallbackException)
             {
                 logger.LogDebug(exception, "Minecraft connection closed");
             }

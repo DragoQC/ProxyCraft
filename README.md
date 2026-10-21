@@ -43,6 +43,23 @@ I built it for my isolated Minecraft servers on Proxmox: one main gate, a simple
 
 The database sets itself up on first launch. No manual database setup or Node.js installation needed.
 
+Fresh installs start without login. Enable sign-in in **App Settings** and generate an API key for remote management. Keep the dashboard/API on a trusted network or VPN, or protect it with an HTTPS reverse proxy. [Security notes →](docs/SECURITY.md)
+
+## Screenshots
+
+Example domains and demo connections; resource readings are from the capture machine.
+
+![Configured proxies in Dark mode, with backend status and live connection counts](docs/images/proxies-dark.png)
+
+<details>
+<summary>Dashboard and mobile Rainbow view</summary>
+
+![Light dashboard showing the listener, configured routes, and CPU, RAM, and disk usage](docs/images/dashboard-light.png)
+
+<img src="docs/images/proxies-rainbow-mobile.png" width="390" alt="Configured proxies displayed as mobile cards in Rainbow mode" />
+
+</details>
+
 ## Prefer Docker?
 
 ```bash

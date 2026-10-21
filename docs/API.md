@@ -174,7 +174,7 @@ Save proxy settings:
 
 The runtime tries to bind the new port before releasing the previous accepting socket. Existing forwarding streams remain connected. A bind failure still saves the requested setting, reports `listenerError`, and retains the previous `listeningPort` (or null if none). Check these response fields even on HTTP 200; correct the port and save again to retry.
 
-Full Minecraft status details, multi-user management, and 2FA endpoints are not implemented. Dashboard authentication controls management access; Minecraft player authentication remains the backend server's responsibility.
+Full Minecraft status details and multi-user management are not implemented. Dashboard authentication, including optional 2FA, controls management access; Minecraft player authentication remains the backend server's responsibility.
 
 ### Public dashboard settings
 
