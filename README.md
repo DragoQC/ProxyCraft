@@ -37,6 +37,7 @@ I built it for my isolated Minecraft servers on Proxmox: one main gate, a simple
 
 - **Simple management:** search, add, edit, delete, and click a domain to copy it. Works on desktop and mobile.
 - **Immediate changes:** saving a route applies it right away, restarting only that route's connections.
+- **Optional RCON forwarding:** enable it per route, choose a public port and backend RCON port (default **25575**), and connect using the same Minecraft domain. Each route needs its own public RCON port.
 - **Connection visibility:** backend reachability, live connection counts and sessions, plus the latest **20 login attempts per proxy**.
 - **Access your way:** optional sign-in and authenticator 2FA, API-key access for automation, and an optional public welcome page.
 - **A useful dashboard:** CPU, RAM, and disk usage, with **Light**, **Dark**, and **Rainbow** themes.
@@ -68,7 +69,7 @@ cd ProxyCraft
 docker compose up -d --build
 ```
 
-Uses the same **8080** dashboard and **25565** Minecraft ports. Keep the `proxycraft-data` volume when updating. [Docker details →](docs/INSTALLATION.md#docker)
+Uses the same **8080** dashboard and **25565** Minecraft ports. Publish any additional RCON ports you enable in your Docker port mappings and forward/restrict them on your router/firewall as needed. Keep the `proxycraft-data` volume when updating. [Docker details →](docs/INSTALLATION.md#docker)
 
 ---
 

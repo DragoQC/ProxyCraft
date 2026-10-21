@@ -36,3 +36,9 @@ This is a limited local review, not a penetration test or a guarantee that the a
 The public Minecraft listener currently has no global or per-source connection cap. Packet bounds and read timeouts reduce individual connection costs, but connection floods can still exhaust sockets, memory, bandwidth, or database-write capacity. The saved-history limit bounds stored rows; it does not rate limit incoming login attempts. Apply network-level limits and monitoring appropriate to your exposure.
 
 Live connection state and recorded player names describe what the proxy observed. Names are supplied by clients and do not prove authenticated identities or successful Minecraft joins.
+
+## Optional RCON TCP forwarding
+
+Enabling RCON forwarding exposes a separate TCP listener per route. It forwards passwords/commands unchanged to the configured backend, whose RCON password authenticates the client. ProxyCraft's dashboard sessions and management API keys do not authenticate raw RCON traffic. RCON is plaintext; use a trusted LAN/VPN path or firewall restrictions appropriate to the network. No router/firewall/Docker mappings are created automatically.
+
+RCON forwarding uses a global 128-session cap, a five-second backend connect deadline, two-minute idle timeout, pre-connect local-listener loop checks, and pooled bounded buffers that are cleared on return. No RCON credentials, commands, output, or sessions are written to the database/player history. This separate cap does not change the existing Minecraft listener's capacity limits.

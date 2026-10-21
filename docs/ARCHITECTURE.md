@@ -41,7 +41,7 @@ The Debian 13 installer and Docker deployments are described in [installation](I
 
 The default data directory is `App_Data`, configurable through `Storage:Directory`. It is excluded from version control and outside `wwwroot`.
 
-`DatabaseInitializer` runs before accepting HTTP requests. It initializes settings, then invokes EF Core's `EnsureCreatedAsync`. Missing databases are created automatically; ordinary restarts retain rows. Only the specifically approved missing tables and nullable user 2FA columns are added to older installations. There is no general migration or destructive schema update.
+`DatabaseInitializer` runs before accepting HTTP requests. It initializes settings, then invokes EF Core's `EnsureCreatedAsync`. Missing databases are created automatically; ordinary restarts retain rows. Only the specifically approved missing tables, nullable user 2FA columns, and optional RCON forwarding columns/index are added to older installations. There is no general migration or destructive schema update.
 
 The app tables are `users`, `proxies`, `api_keys`, and `connection_events`. IDs belong to these derived models. `BaseModel` contains exactly three properties: `CreatedAt`, nullable `ModifiedAt`, and `IsActive`, mapped to `created_at`, `modified_at`, and `is_active`. The DbContext sets UTC creation and modification timestamps on async saves.
 
@@ -132,3 +132,13 @@ The existing JSON settings and app-settings API also store `PublicDashboardTitle
 The protected `/dashboard` MVC route previews that welcome view with admin navigation, while `/` keeps its existing anonymous-access behavior. All five admin navigation links have inline SVG icons, accessible names, titles, and 44px targets. Labels remain visible from 640px upward and use screen-reader-only text below it. Below 640px, navigation spaces all five icons evenly from left to right; desktop links remain aligned at the start. No icon package, schema change, or extra management endpoint is added.
 
 Header actions stretch within their flex row, so sign-in/sign-out controls match the theme picker’s full height on desktop and mobile without a fixed pixel height.
+
+## RCON forwarding
+
+Each proxy can opt into `RconEnabled`, `RconListenPort`, and `RconDestinationPort`. Defaults are false/25575/25575; a partial unique index reserves a public port only while forwarding is enabled. Startup checks/adds only these approved missing columns/index on older databases without changing existing route/account data.
+
+`RconProxyService` owns separate TCP listeners by proxy ID. `ProxyService` performs its existing SQLite transaction, reserves any new RCON listener before saving, and commits persistence through the forwarding service's serialized update callback. A failed bind/save releases only the reservation and preserves old sessions/settings. Once committed, the forwarding update applies even if the HTTP client disconnects. A same-port edit swaps only that listener's target/cancellation scope; a changed port binds the replacement before closing the old socket. Delete/disable stops only that route's RCON listener and sessions. RCON-only edits preserve that route's Minecraft sessions; gameplay/no-op edits retain their established Minecraft refresh behavior. Startup bind errors are reported through the existing proxy-list DTO rather than taking down Minecraft routing.
+
+Traffic is copied unchanged with pooled 16 KiB buffers, a five-second bounded backend connection, two-minute idle cancellation, and at most 128 simultaneous RCON sessions. It resolves DNS once and prevents forwarding into a local proxy listener before opening the backend. Backend passwords and commands are opaque; there is no command execution API or saved RCON password in ProxyCraft. These sessions do not enter Minecraft player history/counts. RconCraft owns the client UI, password storage, authentication/status checks, command execution, and future player/completion tools.
+
+The public RCON port selects a backend; raw RCON has no requested hostname field. Different domains on one public IP cannot share a single RCON port. Forward/publish chosen ports externally as needed. Management authentication/API keys do not authenticate this raw stream; backend RCON authentication applies. The protocol is plaintext TCP.

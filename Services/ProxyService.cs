@@ -10,6 +10,7 @@ namespace ProxyCraft.Services;
 public sealed class ProxyService(
     ProxyCraftDbContext database,
     MinecraftProxyService runtime,
+    RconProxyService rcon,
     DomainEventPublisher notifications)
 {
     public async Task<IReadOnlyList<ProxyResponse>> ListAsync(string? search, CancellationToken cancellationToken = default)
@@ -46,8 +47,11 @@ public sealed class ProxyService(
         await using IDbContextTransaction transaction = await database.Database.BeginTransactionAsync(cancellationToken);
         await EnsureDestinationAvailableAsync(proxy, cancellationToken);
         database.Proxies.Add(proxy);
-        await database.SaveChangesAsync(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
+        await rcon.SaveRouteAsync(proxy, async () =>
+        {
+            await database.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+        }, cancellationToken);
         // A committed edit must reach the runtime even if the HTTP caller disconnects.
         await runtime.RefreshRouteAsync(proxy.Id);
         await notifications.PublishAsync("DomainAdded", proxy.Id, proxy.Domain);
@@ -64,12 +68,27 @@ public sealed class ProxyService(
         }
 
         string previousDomain = proxy.Domain;
+        string previousHost = proxy.DestinationHost;
+        int previousPort = proxy.DestinationPort;
+        bool wasActive = proxy.IsActive;
+        bool previousRconEnabled = proxy.RconEnabled;
+        int previousRconListenPort = proxy.RconListenPort;
+        int previousRconDestinationPort = proxy.RconDestinationPort;
         ApplySettings(proxy, request);
         await EnsureDestinationAvailableAsync(proxy, cancellationToken);
         proxy.IsActive = true;
-        await database.SaveChangesAsync(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
-        await runtime.RefreshRouteAsync(proxy.Id);
+        await rcon.SaveRouteAsync(proxy, async () =>
+        {
+            await database.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+        }, cancellationToken);
+        bool onlyRconChanged = wasActive && previousDomain == proxy.Domain && previousHost == proxy.DestinationHost
+            && previousPort == proxy.DestinationPort && (previousRconEnabled != proxy.RconEnabled
+                || previousRconListenPort != proxy.RconListenPort || previousRconDestinationPort != proxy.RconDestinationPort);
+        if (!onlyRconChanged)
+        {
+            await runtime.RefreshRouteAsync(proxy.Id);
+        }
         if (previousDomain != proxy.Domain)
         {
             await notifications.PublishAsync("DomainRemoved", id, previousDomain);
@@ -90,6 +109,7 @@ public sealed class ProxyService(
         database.Proxies.Remove(proxy);
         await database.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
+        await rcon.DeleteRouteAsync(id);
         await runtime.RefreshRouteAsync(id);
         await notifications.PublishAsync("DomainRemoved", id, proxy.Domain);
         return true;
@@ -98,8 +118,10 @@ public sealed class ProxyService(
     private ProxyResponse ToResponse(Proxy proxy, IReadOnlyDictionary<int, int> connectionCounts)
     {
         RouteHealth health = runtime.GetHealth(proxy);
+        RconForwardingStatus rconStatus = rcon.GetStatus(proxy);
         return new ProxyResponse(proxy.Id, proxy.Domain, proxy.DestinationHost, proxy.DestinationPort, proxy.IsActive,
-            health.IsReachable, health.LastCheckedAt, connectionCounts.GetValueOrDefault(proxy.Id));
+            health.IsReachable, health.LastCheckedAt, connectionCounts.GetValueOrDefault(proxy.Id),
+            proxy.RconEnabled, proxy.RconListenPort, proxy.RconDestinationPort, rconStatus.ListeningPort, rconStatus.Error);
     }
 
     private static void ApplySettings(Proxy proxy, CreateProxyRequest request)
@@ -120,10 +142,22 @@ public sealed class ProxyService(
         proxy.Domain = domain;
         proxy.DestinationHost = destinationHost;
         proxy.DestinationPort = request.DestinationPort;
+        proxy.RconEnabled = request.RconEnabled ?? proxy.RconEnabled;
+        proxy.RconListenPort = request.RconListenPort ?? proxy.RconListenPort;
+        proxy.RconDestinationPort = request.RconDestinationPort ?? proxy.RconDestinationPort;
+        if (proxy.RconListenPort is < 1 or > 65535 || proxy.RconDestinationPort is < 1 or > 65535)
+        {
+            throw new ArgumentException("Enter RCON ports between 1 and 65535.");
+        }
     }
 
     private async Task EnsureDestinationAvailableAsync(Proxy proxy, CancellationToken cancellationToken)
     {
+        if (proxy.RconEnabled && await database.Proxies.AnyAsync((Proxy existing) => existing.Id != proxy.Id
+            && existing.RconEnabled && existing.RconListenPort == proxy.RconListenPort, cancellationToken))
+        {
+            throw new ProxyConflictException("Another proxy already uses this public RCON port. Each RCON route needs a different public port.");
+        }
         List<string> hosts = await database.Proxies.AsNoTracking()
             .Where((Proxy existing) => existing.Id != proxy.Id && existing.DestinationPort == proxy.DestinationPort)
             .Select((Proxy existing) => existing.DestinationHost).ToListAsync(cancellationToken);

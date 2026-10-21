@@ -45,6 +45,36 @@ public static class DatabaseInitializer
             await database.Database.ExecuteSqlRawAsync(statement, cancellationToken);
         }
 
+        // Explicitly approved optional RCON forwarding fields; older routes stay disabled.
+        HashSet<string> proxyColumns = new(StringComparer.OrdinalIgnoreCase);
+        await using (DbCommand command = database.Database.GetDbConnection().CreateCommand())
+        {
+            command.CommandText = "PRAGMA table_info('proxies')";
+            await using DbDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
+            while (await reader.ReadAsync(cancellationToken))
+            {
+                proxyColumns.Add(reader.GetString(1));
+            }
+        }
+        foreach (string column in new string[] { "RconEnabled", "RconListenPort", "RconDestinationPort" })
+        {
+            if (proxyColumns.Contains(column))
+            {
+                continue;
+            }
+            string statement = column switch
+            {
+                "RconEnabled" => "ALTER TABLE \"proxies\" ADD COLUMN \"RconEnabled\" INTEGER NOT NULL DEFAULT 0",
+                "RconListenPort" => "ALTER TABLE \"proxies\" ADD COLUMN \"RconListenPort\" INTEGER NOT NULL DEFAULT 25575",
+                _ => "ALTER TABLE \"proxies\" ADD COLUMN \"RconDestinationPort\" INTEGER NOT NULL DEFAULT 25575"
+            };
+            await database.Database.ExecuteSqlRawAsync(statement, cancellationToken);
+        }
+        await database.Database.ExecuteSqlRawAsync("""
+            CREATE UNIQUE INDEX IF NOT EXISTS "IX_proxies_RconListenPort"
+                ON "proxies" ("RconListenPort") WHERE "RconEnabled" = 1;
+            """, cancellationToken);
+
         await database.Database.CloseConnectionAsync();
 
         // The user authorized these new tables. EnsureCreated does not add tables to an existing database.

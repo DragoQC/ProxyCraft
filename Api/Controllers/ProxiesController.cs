@@ -13,7 +13,7 @@ public sealed class ProxiesController(
 {
     [HttpGet]
     [EndpointSummary("List configured proxies")]
-    [EndpointDescription("Search is optional and matches domain or destination, ignoring case. Results are ordered by domain and include an in-memory count of current named forwarding sessions. Health is a cached TCP check, not a full Minecraft status response.")]
+    [EndpointDescription("Search is optional and matches domain or destination, ignoring case. Results are ordered by domain and include an in-memory count of current named forwarding sessions. Health is a cached Minecraft TCP check. Responses also include configured/actual RCON forwarding ports and listener errors.")]
     public Task<IReadOnlyList<ProxyResponse>> List([FromQuery] string? search, CancellationToken cancellationToken) =>
         proxies.ListAsync(search, cancellationToken);
 
@@ -49,7 +49,7 @@ public sealed class ProxiesController(
 
     [HttpPut("{id:int}")]
     [EndpointSummary("Edit a proxy")]
-    [EndpointDescription("Saves and replaces only this route. Its current players disconnect and can reconnect using the new settings; other routes stay connected. Invalid changes leave the running route untouched.")]
+    [EndpointDescription("Saves and replaces only this route. Its current players disconnect and can reconnect using the new settings; other routes stay connected. Invalid changes leave the running route untouched. Optional RCON fields preserve existing values when omitted; a new public RCON port is reserved before saving. RCON-only changes preserve Minecraft sessions.")]
     [ProducesResponseType<ProxyResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -71,13 +71,13 @@ public sealed class ProxiesController(
         }
         catch (DbUpdateException exception) when (exception.InnerException is SqliteException { SqliteExtendedErrorCode: 2067 })
         {
-            return Problem(statusCode: StatusCodes.Status409Conflict, title: "A proxy for this domain already exists.");
+            return Problem(statusCode: StatusCodes.Status409Conflict, title: "A proxy for this domain or public RCON port already exists.");
         }
     }
 
     [HttpPost]
     [EndpointSummary("Create a proxy")]
-    [EndpointDescription("The route becomes available immediately. Both the domain and the destination host/port pair must be unique. The same host with a different port is allowed.")]
+    [EndpointDescription("The route becomes available immediately. Both the domain and the destination host/port pair must be unique. The same host with a different port is allowed. Optional RCON forwarding defaults off with public/backend port 25575; enabled public ports must be unique and bind successfully before saving.")]
     [ProducesResponseType<ProxyResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -98,7 +98,7 @@ public sealed class ProxiesController(
         }
         catch (DbUpdateException exception) when (exception.InnerException is SqliteException { SqliteExtendedErrorCode: 2067 })
         {
-            return Problem(statusCode: StatusCodes.Status409Conflict, title: "A proxy for this domain already exists.");
+            return Problem(statusCode: StatusCodes.Status409Conflict, title: "A proxy for this domain or public RCON port already exists.");
         }
     }
 }
